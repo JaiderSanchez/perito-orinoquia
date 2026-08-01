@@ -1,8 +1,17 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CatalogoController;
+
+// Usamos "Route::" en lugar de "Router::"
+Route::middleware('auth:sanctum')->group(function () {
+
+    // Rutas para los Catálogos Dinámicos
+    Route::get('/tipos-vehiculo', [CatalogoController::class, 'getTiposVehiculo']);
+    Route::get('/catalogos/{codigo_tipo}', [CatalogoController::class, 'getCatalogosPorTipo']);
+
+});
 
 // HU-02 y HU-04: Inicio de sesión (Público)
 // El middleware 'throttle:5,15' bloquea la IP por 15 minutos si hay 5 intentos fallidos
@@ -10,15 +19,15 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,
 
 // Rutas Protegidas (Solo accesibles si el usuario envía un token válido)
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     // HU-01: Registro de nuevos usuarios
     // Route::post('/registro-usuarios', [AuthController::class, 'register']);
     // HU-01: Registro de nuevos usuarios (Ahora con doble candado: Token + Rol Admin)
     Route::middleware('admin')->post('/registro-usuarios', [AuthController::class, 'register']);
-    
+
     // HU-05: Cerrar sesión
     Route::post('/logout', [AuthController::class, 'logout']);
-    
+
     // Ruta de prueba para ver los datos del usuario logueado
     Route::get('/user', function (Request $request) {
         return $request->user();
