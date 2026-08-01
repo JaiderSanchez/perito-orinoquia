@@ -15,11 +15,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. Crear usuario de prueba si lo necesitas
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => bcrypt('password'), // Asegura una contraseña si es requerido
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // 2. Llamar al seeder de catálogos de peritaje
+        $this->call([
+            PeritajeCatalogoSeeder::class,
         ]);
     }
 }

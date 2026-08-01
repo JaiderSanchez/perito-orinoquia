@@ -13,10 +13,9 @@ class PeritajeController extends Controller
     {
         // 1. Validar los datos mínimos requeridos
         $request->validate([
-            'tipo_vehiculo_id' => 'required|uuid',
+            'tipo_vehiculo_id' => 'required|exists:tipos_vehiculo,id',
             'placa' => 'required|string|max:10',
             'cliente_nombre' => 'required|string',
-            // Puedes agregar más validaciones aquí
         ]);
 
         try {
@@ -24,53 +23,62 @@ class PeritajeController extends Controller
             DB::beginTransaction();
 
             // 3. Crear el Peritaje Principal
+            // (Asegúrate de ajustar los campos según los que ya tengas en tu tabla 'peritajes')
             $peritaje = Peritaje::create([
-                // Generamos un código de reporte único, ej: PER-X89JD
                 'codigo_reporte' => 'PER-' . strtoupper(Str::random(5)),
                 'tipo_vehiculo_id' => $request->tipo_vehiculo_id,
-                'usuario_id' => $request->user()->id, // El usuario logueado en Sanctum
+                'usuario_id' => $request->user()?->id ?? 1,
                 'estado' => 'completado',
                 'placa' => strtoupper($request->placa),
-                'marca' => $request->marca,
-                'modelo' => $request->modelo,
+                'marca' => $request->marca ?? null,
+                'modelo' => $request->modelo ?? null,
                 'cliente_nombre' => $request->cliente_nombre,
-                // ... Mapear el resto de campos principales aquí
             ]);
 
-            // 4. Guardar Accesorios (Si React envía un array llamado 'accesorios')
+            // 4. Guardar Accesorios
             if ($request->has('accesorios') && is_array($request->accesorios)) {
                 $accesoriosData = [];
                 foreach ($request->accesorios as $acc) {
                     $accesoriosData[] = [
-                        'id' => (string) Str::uuid(),
                         'peritaje_id' => $peritaje->id,
                         'catalogo_accesorio_id' => $acc['catalogo_id'],
-                        'estado' => $acc['estado'], // 'bueno', 'malo', 'regular', 'no_aplica'
-                        'observaciones' => $acc['observaciones'] ?? null,
+                        'presente' => $acc['presente'] ?? true,
+                        'danado' => $acc['danado'] ?? false,
+                        'costo_reparacion' => $acc['costo_reparacion'] ?? null,
+                        'comentario_dano' => $acc['observaciones'] ?? null,
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
                 }
-                // Insertamos todos los accesorios de golpe por rendimiento
                 DB::table('peritaje_accesorios')->insert($accesoriosData);
             }
 
-            // 5. Guardar Sistemas Mecánicos (Misma lógica)
+            // 5. Guardar Sistemas Mecánicos
             if ($request->has('sistemas_mecanicos') && is_array($request->sistemas_mecanicos)) {
                 $sistemasData = [];
                 foreach ($request->sistemas_mecanicos as $sis) {
                     $sistemasData[] = [
-                        'id' => (string) Str::uuid(),
                         'peritaje_id' => $peritaje->id,
                         'catalogo_sistema_id' => $sis['catalogo_id'],
-                        'estado' => $sis['estado'],
-                        'nivel_desgaste' => $sis['nivel_desgaste'] ?? null,
+                        'estado' => $sis['estado'] ?? 'BUENO', // 'BUENO', 'REGULAR', 'MALO'
+                        'observaciones' => $sis['observaciones'] ?? null,
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
                 }
                 DB::table('peritaje_sistemas_mecanicos')->insert($sistemasData);
             }
 
-            // Aquí repetirías el bloque 'if' para carrocería, daños, etc.
+            // 6. Registrar en el historial de estados
+            DB::table('peritaje_historial_estados')->insert([
+                'peritaje_id' => $peritaje->id,
+                'estado' => 'completado',
+                'usuario_id' => $request->user()?->id ?? 1,
+                'comentario' => 'Peritaje registrado exitosamente desde la API',
+                'created_at' => now(),
+            ]);
 
-            // 6. Si todo salió bien, confirmamos los cambios en la base de datos
+            // 7. Si todo salió bien, confirmamos los cambios en la base de datos
             DB::commit();
 
             return response()->json([
@@ -80,7 +88,7 @@ class PeritajeController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            // 7. ¡Error! Revertimos todos los cambios para no dejar basura en la base de datos
+            // 8. ¡Error! Revertimos todos los cambios para no dejar registros huérfanos
             DB::rollBack();
 
             return response()->json([

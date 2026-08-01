@@ -1,41 +1,72 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\TipoVehiculo;
-use App\Models\CatalogoAccesorio;
-use App\Models\CatalogoPiezasCarroceria;
-use App\Models\CatalogoZonasCabina;
-use App\Models\CatalogoElementosTecnicos;
-use App\Models\CatalogoSistemasMecanicos;
+use Illuminate\Support\Facades\DB;
 
 class CatalogoController extends Controller
 {
-    // Obtener todos los catálogos según el tipo de vehículo (ej: 'carro', 'moto')
-    public function getCatalogosPorTipo($codigo_tipo)
+    // 1. Obtener todos los tipos de vehículo activos
+    public function tiposVehiculo()
     {
-        $tipo = TipoVehiculo::where('codigo', $codigo_tipo)->where('activo', true)->first();
-
-        if (!$tipo) {
-            return response()->json(['message' => 'Tipo de vehículo no encontrado'], 404);
-        }
-
-        return response()->json([
-            'tipo_vehiculo' => $tipo,
-            'accesorios' => CatalogoAccesorio::where('tipo_vehiculo_id', $tipo->id)->orderBy('orden')->get(),
-            'piezas_carroceria' => CatalogoPiezasCarroceria::where('tipo_vehiculo_id', $tipo->id)->orderBy('orden')->get(),
-            'zonas_cabina' => CatalogoZonasCabina::where('tipo_vehiculo_id', $tipo->id)->orderBy('orden')->get(),
-            'sistemas_mecanicos' => CatalogoSistemasMecanicos::where('tipo_vehiculo_id', $tipo->id)->orderBy('orden')->get(),
-            // Los elementos técnicos son globales, no dependen del tipo de vehículo
-            'elementos_tecnicos' => CatalogoElementosTecnicos::where('activo', true)->orderBy('orden')->get(),
-        ]);
+        $tipos = DB::table('tipos_vehiculo')->where('activo', true)->orderBy('orden')->get();
+        return response()->json($tipos);
     }
 
-    // Obtener la lista de tipos de vehículo disponibles (Para el primer select en React)
-    public function getTiposVehiculo()
+    // 2. Obtener accesorios según el tipo de vehículo (por código o ID)
+    public function accesorios($tipoVehiculoId)
     {
-        $tipos = TipoVehiculo::where('activo', true)->orderBy('orden')->get();
-        return response()->json($tipos);
+        $accesorios = DB::table('catalogo_accesorios')
+            ->where('tipo_vehiculo_id', $tipoVehiculoId)
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
+
+        return response()->json($accesorios);
+    }
+
+    // 3. Obtener piezas de carrocería (daños externos) según el tipo de vehículo
+    public function piezasCarroceria($tipoVehiculoId)
+    {
+        $piezas = DB::table('catalogo_piezas_carroceria')
+            ->where('tipo_vehiculo_id', $tipoVehiculoId)
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
+
+        return response()->json($piezas);
+    }
+
+    // 4. Obtener zonas de cabina (daños internos) según el tipo de vehículo
+    public function zonasCabina($tipoVehiculoId)
+    {
+        $zonas = DB::table('catalogo_zonas_cabina')
+            ->where('tipo_vehiculo_id', $tipoVehiculoId)
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
+
+        return response()->json($zonas);
+    }
+
+    // 5. Obtener elementos técnicos globales
+    public function elementosTecnicos()
+    {
+        $elementos = DB::table('catalogo_elementos_tecnicos')->where('activo', true)->orderBy('orden')->get();
+        return response()->json($elementos);
+    }
+
+    // 6. Obtener sistemas mecánicos según el tipo de vehículo
+    public function sistemasMecanicos($tipoVehiculoId)
+    {
+        $sistemas = DB::table('catalogo_sistemas_mecanicos')
+            ->where('tipo_vehiculo_id', $tipoVehiculoId)
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
+
+        return response()->json($sistemas);
     }
 }
