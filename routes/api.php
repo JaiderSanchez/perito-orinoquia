@@ -1,35 +1,52 @@
-<?php
+<?php // Usamos "Route::" en lugar de "Router::"
 
+use App\Http\Controllers\Api\CatalogoController;
+use App\Http\Controllers\Api\PeritajeArchivoController;
+use App\Http\Controllers\Api\PeritajeController;
+use App\Http\Controllers\Api\PeritajeItemController;
+use App\Http\Controllers\Api\PeritajePdfController;
+use App\Http\Controllers\AuthController; // O tu controlador de autenticación
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CatalogoController;
 
-// Usamos "Route::" en lugar de "Router::"
+
+// ==========================================
+// 1. RUTAS PÚBLICAS (Login y Registro)
+// ==========================================
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+// ==========================================
+// 2. RUTAS PROTEGIDAS (Requieren Token Sanctum)
+// ==========================================
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Rutas para los Catálogos Dinámicos
-    Route::get('/tipos-vehiculo', [CatalogoController::class, 'getTiposVehiculo']);
-    Route::get('/catalogos/{codigo_tipo}', [CatalogoController::class, 'getCatalogosPorTipo']);
+    // Catálogos
+    Route::get('tipos-vehiculo', [CatalogoController::class, 'tiposVehiculo']);
+    Route::get('tipos-vehiculo/{tipoVehiculo}/checklist', [CatalogoController::class, 'checklist']);
+    Route::get('sucursales', [CatalogoController::class, 'sucursales']);
+    Route::get('vendedores', [CatalogoController::class, 'vendedores']);
 
-});
+    // Peritajes
+    Route::get('peritajes', [PeritajeController::class, 'index']);
+    Route::post('peritajes', [PeritajeController::class, 'store']);
+    Route::get('peritajes/{peritaje}', [PeritajeController::class, 'show']);
+    Route::patch('peritajes/{peritaje}', [PeritajeController::class, 'update']);
+    Route::patch('peritajes/{peritaje}/estado', [PeritajeController::class, 'cambiarEstado']);
+    Route::delete('peritajes/{peritaje}', [PeritajeController::class, 'destroy']);
 
-// HU-02 y HU-04: Inicio de sesión (Público)
-// El middleware 'throttle:5,15' bloquea la IP por 15 minutos si hay 5 intentos fallidos
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,15');
+    // Checklists por ítem
+    Route::put('peritajes/{peritaje}/accesorios/{catalogoAccesorioId}', [PeritajeItemController::class, 'upsertAccesorio']);
+    Route::put('peritajes/{peritaje}/danos-externos/{catalogoPiezaId}', [PeritajeItemController::class, 'upsertDanoExterno']);
+    Route::put('peritajes/{peritaje}/danos-internos/{catalogoZonaId}', [PeritajeItemController::class, 'upsertDanoInterno']);
+    Route::put('peritajes/{peritaje}/detalles-tecnicos/{catalogoElementoId}', [PeritajeItemController::class, 'upsertDetalleTecnico']);
+    Route::put('peritajes/{peritaje}/sistemas-mecanicos/{catalogoSistemaId}', [PeritajeItemController::class, 'upsertSistemaMecanico']);
+    Route::put('peritajes/{peritaje}/compresion', [PeritajeItemController::class, 'upsertCompresion']);
 
-// Rutas Protegidas (Solo accesibles si el usuario envía un token válido)
-Route::middleware('auth:sanctum')->group(function () {
+    // Archivos
+    Route::post('peritajes/{peritaje}/archivos', [PeritajeArchivoController::class, 'store']);
+    Route::post('peritajes/{peritaje}/firma', [PeritajeArchivoController::class, 'guardarFirma']);
+    Route::delete('archivos/{archivo}', [PeritajeArchivoController::class, 'destroy']);
 
-    // HU-01: Registro de nuevos usuarios
-    // Route::post('/registro-usuarios', [AuthController::class, 'register']);
-    // HU-01: Registro de nuevos usuarios (Ahora con doble candado: Token + Rol Admin)
-    Route::middleware('admin')->post('/registro-usuarios', [AuthController::class, 'register']);
-
-    // HU-05: Cerrar sesión
-    Route::post('/logout', [AuthController::class, 'logout']);
-
-    // Ruta de prueba para ver los datos del usuario logueado
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    // PDF
+    Route::get('peritajes/{peritaje}/pdf', [PeritajePdfController::class, 'generar']);
 });

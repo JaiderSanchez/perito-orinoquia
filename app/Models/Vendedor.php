@@ -5,11 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-class CatalogoZonaCabina extends Model
+class Vendedor extends Model
 {
     use HasUuids;
 
-    public $timestamps = false;
-    protected $fillable = ['tipo_vehiculo_id', 'codigo', 'nombre', 'orden', 'activo'];
+    protected $fillable = ['nombre', 'sucursal_id', 'activo'];
     protected $casts = ['activo' => 'boolean'];
+
+    public function sucursal()
+    {
+        return $this->belongsTo(Sucursal::class);
+    }
 }
