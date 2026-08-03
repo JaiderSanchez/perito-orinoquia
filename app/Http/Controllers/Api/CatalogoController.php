@@ -8,6 +8,7 @@ use App\Models\Sucursal;
 use App\Models\TipoVehiculo;
 use App\Models\Vendedor;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request; // <-- Asegúrate de tener esta importación
 
 class CatalogoController extends Controller
 {
@@ -19,21 +20,13 @@ class CatalogoController extends Controller
         );
     }
 
-    /**
-     * GET /api/tipos-vehiculo/{tipoVehiculo}/checklist
-     * Arma en un solo request todos los catálogos que necesita el frontend
-     * para renderizar el formulario del tipo de vehículo elegido:
-     * accesorios, piezas de carrocería, zonas de cabina (si aplica) y
-     * sistemas mecánicos. Los "detalles técnicos" son universales.
-     */
+    /** GET /api/tipos-vehiculo/{tipoVehiculo}/checklist */
     public function checklist(TipoVehiculo $tipoVehiculo): JsonResponse
     {
         return response()->json([
             'tipo_vehiculo' => $tipoVehiculo,
             'accesorios' => $tipoVehiculo->accesorios,
             'piezas_carroceria' => $tipoVehiculo->piezasCarroceria,
-            // Moto y motocarro no tienen vista interna: el frontend ya
-            // maneja el arreglo vacío mostrando "Sección No Disponible".
             'zonas_cabina' => $tipoVehiculo->zonasCabina,
             'sistemas_mecanicos' => $tipoVehiculo->sistemasMecanicos,
             'elementos_tecnicos' => CatalogoElementoTecnico::where('activo', true)->orderBy('orden')->get(),
@@ -46,9 +39,45 @@ class CatalogoController extends Controller
         return response()->json(Sucursal::where('activa', true)->orderBy('nombre')->get());
     }
 
+    /** POST /api/sucursales */
+    public function storeSucursal(Request $request): JsonResponse
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $sucursal = Sucursal::create([
+            'nombre' => $request->nombre,
+            'activa' => true, // Por si tu tabla maneja este campo según el scope de arriba
+        ]);
+
+        return response()->json([
+            'message' => 'Sucursal creada con éxito',
+            'data' => $sucursal
+        ], 201);
+    }
+
     /** GET /api/vendedores */
     public function vendedores(): JsonResponse
     {
         return response()->json(Vendedor::where('activo', true)->orderBy('nombre')->get());
+    }
+
+    /** POST /api/vendedores */
+    public function storeVendedor(Request $request): JsonResponse
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        $vendedor = Vendedor::create([
+            'nombre' => $request->nombre,
+            'activo' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Vendedor creado con éxito',
+            'data' => $vendedor
+        ], 201);
     }
 }

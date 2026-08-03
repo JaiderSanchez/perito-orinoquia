@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+// Cambia esto en la parte superior de tu PeritajeController.php:
+use App\Http\Requests\UpdatePeritajeRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Peritaje;
 use Illuminate\Http\JsonResponse;
@@ -102,7 +104,7 @@ class PeritajeController extends Controller
     /**
      * PATCH /api/peritajes/{peritaje}
      */
-    public function update(UpdatePeritajeRequest $request, Peritaje $peritaje): JsonResponse
+    public function update(\App\Http\Requests\UpdatePeritajeRequest $request, Peritaje $peritaje): JsonResponse
     {
         $peritaje->update($request->validated());
 

@@ -14,6 +14,18 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
+// Catálogos
+    Route::get('tipos-vehiculo', [CatalogoController::class, 'tiposVehiculo']);
+    Route::get('tipos-vehiculo/{tipoVehiculo}/checklist', [CatalogoController::class, 'checklist']);
+
+    // Sucursales
+    Route::get('sucursales', [CatalogoController::class, 'sucursales']);
+    Route::post('sucursales', [CatalogoController::class, 'storeSucursal']); // <--- Agrega esta
+
+    // Vendedores
+    Route::get('vendedores', [CatalogoController::class, 'vendedores']);
+    Route::post('vendedores', [CatalogoController::class, 'storeVendedor']); // <--- Agrega esta
+
 // ==========================================
 // 2. RUTAS PROTEGIDAS (Requieren Token Sanctum)
 // ==========================================

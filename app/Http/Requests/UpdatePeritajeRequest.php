@@ -15,10 +15,9 @@ class UpdatePeritajeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Identificación del vehículo
-            'sucursal_vendedor_id' => ['sometimes', 'nullable', 'uuid', 'exists:sucursales,id'],
-            'sucursal_inspeccion_id' => ['sometimes', 'nullable', 'uuid', 'exists:sucursales,id'],
-            'vendedor_id' => ['sometimes', 'nullable', 'uuid', 'exists:vendedores,id'],
+            'sucursal_vendedor_id' => ['sometimes', 'nullable'],
+            'sucursal_inspeccion_id' => ['sometimes', 'nullable'],
+            'vendedor_id' => ['sometimes', 'nullable'],
             'placa' => ['sometimes', 'string', 'max:10'],
             'marca' => ['sometimes', 'string', 'max:80'],
             'linea' => ['sometimes', 'string', 'max:80'],
