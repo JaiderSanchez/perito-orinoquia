@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-class CatalogoElementoTecnico extends Model
+class CatalogoPiezaCarroceria extends Model
 {
     use HasUuids;
 

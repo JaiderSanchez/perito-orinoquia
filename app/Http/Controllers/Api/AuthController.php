@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller; // <-- Aquí está la clave corregida
 use Illuminate\Http\Request;
-use App\Models\User; // <-- Asegúrate de que esta línea esté aquí arriba
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 

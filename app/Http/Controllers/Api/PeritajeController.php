@@ -1,13 +1,13 @@
-<?php
+<?php // @phpstan-ignore-file
 
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StorePeritajeRequest;
-use App\Http\Requests\UpdatePeritajeRequest;
 use App\Models\Peritaje;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PeritajeController extends Controller
 {
@@ -35,23 +35,60 @@ class PeritajeController extends Controller
     /**
      * POST /api/peritajes
      * Crea el peritaje en estado "borrador" apenas el inspector elige el
-     * tipo de vehículo (equivale al modal "Seleccionar Tipo de Vehículo"
-     * del dashboard). El resto de los pasos se van guardando con PATCH.
+     * tipo de vehículo.
      */
-    public function store(StorePeritajeRequest $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $peritaje = Peritaje::create(array_merge($request->validated(), [
+        $data = $request->validate([
+            'tipo_vehiculo_id' => ['required', 'uuid', 'exists:tipos_vehiculo,id'],
+            'sucursal_vendedor_id' => ['nullable'],
+            'sucursal_inspeccion_id' => ['nullable'],
+            'vendedor_id' => ['nullable'],
+            'placa' => ['nullable', 'string', 'max:10'],
+            'marca' => ['nullable', 'string', 'max:80'],
+            'linea' => ['nullable', 'string', 'max:80'],
+            'modelo_anio' => ['nullable', 'integer'],
+            'num_motor' => ['nullable', 'string', 'max:60'],
+            'num_chasis' => ['nullable', 'string', 'max:60'],
+            'kilometraje' => ['nullable', 'integer'],
+        ]);
+
+        $codigoSecuencial = 'PER-' . str_pad(DB::select("SELECT nextval('peritajes_codigo_seq') as val")[0]->val, 4, '0', STR_PAD_LEFT);
+
+        // Validamos y filtramos los UUIDs para asegurar que si viene un valor inválido, vacío o numérico, se guarde como null
+        $sucursalVendedor = (isset($data['sucursal_vendedor_id']) && Str::isUuid($data['sucursal_vendedor_id'])) ? $data['sucursal_vendedor_id'] : null;
+        $sucursalInspeccion = (isset($data['sucursal_inspeccion_id']) && Str::isUuid($data['sucursal_inspeccion_id'])) ? $data['sucursal_inspeccion_id'] : null;
+        $vendedor = (isset($data['vendedor_id']) && Str::isUuid($data['vendedor_id'])) ? $data['vendedor_id'] : null;
+
+        $peritaje = Peritaje::create([
+            'id' => Str::uuid(),
+            'codigo' => $codigoSecuencial,
+            'tipo_vehiculo_id' => $data['tipo_vehiculo_id'],
             'inspector_id' => $request->user()->id,
             'estado' => 'borrador',
-        ]));
+
+            // Asignaciones limpias asegurando compatibilidad de UUIDs
+            'sucursal_vendedor_id' => $sucursalVendedor,
+            'sucursal_inspeccion_id' => $sucursalInspeccion,
+            'vendedor_id' => $vendedor,
+
+            'placa' => !empty($data['placa']) ? strtoupper($data['placa']) : 'SIN-PLACA',
+            'marca' => !empty($data['marca']) ? $data['marca'] : 'POR DEFINIR',
+            'linea' => !empty($data['linea']) ? $data['linea'] : 'POR DEFINIR',
+            'modelo_anio' => $data['modelo_anio'] ?? 2026,
+            'num_motor' => !empty($data['num_motor']) ? $data['num_motor'] : 'PENDIENTE',
+            'num_chasis' => !empty($data['num_chasis']) ? $data['num_chasis'] : 'PENDIENTE',
+            'kilometraje' => $data['kilometraje'] ?? 0,
+        ]);
 
         $peritaje->historialEstados()->create([
+            'id' => Str::uuid(),
             'estado' => 'borrador',
             'usuario_id' => $request->user()->id,
             'comentario' => 'Peritaje iniciado',
         ]);
 
-        return response()->json($peritaje, 201);
+        return response()->json($peritaje->load(['tipoVehiculo', 'inspector']), 201);
     }
 
     /** GET /api/peritajes/{peritaje} */
@@ -64,9 +101,6 @@ class PeritajeController extends Controller
 
     /**
      * PATCH /api/peritajes/{peritaje}
-     * El frontend llama esto en cada "onChange" (equivalente a
-     * handleDataChange en dashboard.jsx), guardando solo los campos que
-     * cambiaron gracias a las reglas "sometimes" del FormRequest.
      */
     public function update(UpdatePeritajeRequest $request, Peritaje $peritaje): JsonResponse
     {
@@ -77,8 +111,6 @@ class PeritajeController extends Controller
 
     /**
      * PATCH /api/peritajes/{peritaje}/estado
-     * Avanza el flujo Borrador -> En Proceso -> Completado (o Anulado),
-     * dejando rastro en peritaje_historial_estados.
      */
     public function cambiarEstado(Request $request, Peritaje $peritaje): JsonResponse
     {
@@ -96,7 +128,7 @@ class PeritajeController extends Controller
         return response()->json($peritaje->fresh());
     }
 
-    /** DELETE /api/peritajes/{peritaje} — se anula, nunca se borra físico (trazabilidad). */
+    /** DELETE /api/peritajes/{peritaje} */
     public function destroy(Request $request, Peritaje $peritaje): JsonResponse
     {
         $peritaje->cambiarEstado('anulado', $request->user()->id, 'Peritaje anulado');

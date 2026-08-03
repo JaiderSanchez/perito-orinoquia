@@ -9,6 +9,8 @@ class TipoVehiculo extends Model
 {
     use HasUuids;
 
+    protected $table = 'tipos_vehiculo'; // <-- Añade esta línea para apuntar a la tabla correcta
+
     public $timestamps = false;
     protected $fillable = ['codigo', 'nombre', 'icono', 'descripcion', 'orden', 'activo'];
     protected $casts = ['activo' => 'boolean'];
@@ -33,4 +35,3 @@ class TipoVehiculo extends Model
         return $this->hasMany(CatalogoSistemaMecanico::class)->where('activo', true)->orderBy('orden');
     }
 }
-    

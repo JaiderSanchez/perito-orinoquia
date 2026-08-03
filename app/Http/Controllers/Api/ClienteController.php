@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\Cliente;
 use Illuminate\Http\Request;
@@ -12,7 +12,7 @@ class ClienteController extends Controller
     {
         // Eloquent hace la magia: trae todos los clientes ordenados por el más reciente
         $clientes = Cliente::orderBy('id_cliente', 'desc')->get();
-        
+
         // Retornamos los datos en formato JSON (que es lo que entiende el frontend)
         return response()->json($clientes, 200);
     }

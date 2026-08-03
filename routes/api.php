@@ -1,13 +1,12 @@
-<?php // Usamos "Route::" en lugar de "Router::"
+<?php
 
 use App\Http\Controllers\Api\CatalogoController;
 use App\Http\Controllers\Api\PeritajeArchivoController;
 use App\Http\Controllers\Api\PeritajeController;
 use App\Http\Controllers\Api\PeritajeItemController;
 use App\Http\Controllers\Api\PeritajePdfController;
-use App\Http\Controllers\AuthController; // O tu controlador de autenticación
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
-
 
 // ==========================================
 // 1. RUTAS PÚBLICAS (Login y Registro)
