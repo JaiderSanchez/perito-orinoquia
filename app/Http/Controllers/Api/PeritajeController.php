@@ -13,11 +13,7 @@ use Illuminate\Support\Str;
 
 class PeritajeController extends Controller
 {
-    /**
-     * GET /api/peritajes
-     * Alimenta la "Bandeja de Entrada" del dashboard. Soporta filtros
-     * simples por estado y búsqueda por placa vía query params.
-     */
+
     public function index(Request $request): JsonResponse
     {
         $query = Peritaje::with(['tipoVehiculo', 'inspector', 'sucursalVendedor', 'sucursalInspeccion', 'vendedor'])
@@ -94,19 +90,30 @@ class PeritajeController extends Controller
     }
 
     /** GET /api/peritajes/{peritaje} */
-    public function show(Peritaje $peritaje): JsonResponse
-    {
-        return response()->json(
-            Peritaje::conDetalleCompleto()->findOrFail($peritaje->id)
-        );
-    }
+    public function show($id)
+{
+    $peritaje = Peritaje::findOrFail($id);
+
+    // Si tus tablas relacionadas existen, las cargas así de forma segura:
+    // $peritaje->load(['accesorios', 'detallesTecnicos']);
+
+    return response()->json($peritaje);
+}
 
     /**
      * PATCH /api/peritajes/{peritaje}
      */
-    public function update(\App\Http\Requests\UpdatePeritajeRequest $request, Peritaje $peritaje): JsonResponse
+   public function update(\App\Http\Requests\UpdatePeritajeRequest $request, Peritaje $peritaje): JsonResponse
     {
+        // 1. VERIFICACIÓN EN LOGS: Mira esto en tu archivo storage/logs/laravel.log
+        \Illuminate\Support\Facades\Log::info('Datos recibidos en update:', $request->all());
+        \Illuminate\Support\Facades\Log::info('Datos validados:', $request->validated());
+
         $peritaje->update($request->validated());
+
+        if ($request->has('accesorios')) {
+            $peritaje->update(['accesorios' => $request->input('accesorios')]);
+        }
 
         return response()->json($peritaje->fresh());
     }
