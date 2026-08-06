@@ -8,7 +8,30 @@ class UpdatePeritajeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Asegúrate de que esté en true
+        return true;
+    }
+
+    // <-- AQUÍ ES DONDE DEBES COLOCARLO -->
+    protected function prepareForValidation(): void
+    {
+        // 1. Limpiar cadenas vacías a null
+        $input = collect($this->all())->map(function ($value) {
+            return $value === "" ? null : $value;
+        })->toArray();
+
+        // 2. Decodificar los campos que viajan como JSON strings desde FormData
+        $camposJson = ['accesorios', 'danos_externos', 'danos_internos', 'detalles_tecnicos', 'sistemas_mecanicos', 'compresion_cilindros'];
+
+        foreach ($camposJson as $campo) {
+            if (isset($input[$campo]) && is_string($input[$campo])) {
+                $decoded = json_decode($input[$campo], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $input[$campo] = $decoded;
+                }
+            }
+        }
+
+        $this->merge($input);
     }
 
     public function rules(): array
@@ -17,9 +40,9 @@ class UpdatePeritajeRequest extends FormRequest
             // Estado y relaciones principales
             'estado' => ['sometimes', 'string', 'in:borrador,en_proceso,completado,anulado'],
             'tipo_vehiculo_id' => ['sometimes', 'uuid', 'exists:tipos_vehiculo,id'],
-            'sucursal_vendedor_id' => ['nullable'],
-            'sucursal_inspeccion_id' => ['nullable'],
-            'vendedor_id' => ['nullable'],
+            'sucursal_vendedor_id' => ['nullable', 'uuid', 'exists:sucursales,id'],
+            'sucursal_inspeccion_id' => ['nullable', 'uuid', 'exists:sucursales,id'],
+            'vendedor_id' => ['nullable', 'uuid', 'exists:vendedores,id'],
 
             // Información General
             'placa' => ['sometimes', 'string', 'max:10'],
@@ -65,13 +88,17 @@ class UpdatePeritajeRequest extends FormRequest
             'score_electrico' => ['sometimes', 'numeric'],
             'score_legal' => ['sometimes', 'numeric'],
 
-            // Arreglos / Listas (muy importante para que no los borre)
+            // Arreglos / Listas
             'accesorios' => ['nullable', 'array'],
             'danos_externos' => ['nullable', 'array'],
             'danos_internos' => ['nullable', 'array'],
             'detalles_tecnicos' => ['nullable', 'array'],
             'sistemas_mecanicos' => ['nullable', 'array'],
             'compresion_cilindros' => ['nullable', 'array'],
+
+            // Archivos de Fotos
+            'foto_soat' => ['nullable', 'file', 'image', 'max:5120'],
+            'foto_rtm' => ['nullable', 'file', 'image', 'max:5120'],
         ];
     }
 }

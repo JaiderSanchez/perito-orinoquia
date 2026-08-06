@@ -9,35 +9,33 @@ use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
-// 1. RUTAS PÚBLICAS (Login y Registro)
+// 1. RUTAS PÚBLICAS (Login y Catálogos base)
 // ==========================================
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
 
-// Catálogos
-    Route::get('tipos-vehiculo', [CatalogoController::class, 'tiposVehiculo']);
-    Route::get('tipos-vehiculo/{tipoVehiculo}/checklist', [CatalogoController::class, 'checklist']);
-
-    // Sucursales
-    Route::get('sucursales', [CatalogoController::class, 'sucursales']);
-    Route::post('sucursales', [CatalogoController::class, 'storeSucursal']); // <--- Agrega esta
-
-    // Vendedores
-    Route::get('vendedores', [CatalogoController::class, 'vendedores']);
-    Route::post('vendedores', [CatalogoController::class, 'storeVendedor']); // <--- Agrega esta
+// Catálogos públicos:
+Route::get('tipos-vehiculo', [CatalogoController::class, 'tiposVehiculo']);
+Route::get('tipos-vehiculo/{tipoVehiculo}/checklist', [CatalogoController::class, 'checklist']);
+Route::get('sucursales', [CatalogoController::class, 'sucursales']);
+Route::get('vendedores', [CatalogoController::class, 'vendedores']);
 
 // ==========================================
 // 2. RUTAS PROTEGIDAS (Requieren Token Sanctum)
 // ==========================================
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Catálogos
-    Route::get('tipos-vehiculo', [CatalogoController::class, 'tiposVehiculo']);
-    Route::get('tipos-vehiculo/{tipoVehiculo}/checklist', [CatalogoController::class, 'checklist']);
-    Route::get('sucursales', [CatalogoController::class, 'sucursales']);
-    Route::get('vendedores', [CatalogoController::class, 'vendedores']);
+    // Perfil y Contraseña del usuario autenticado
+    Route::put('user/password', [AuthController::class, 'updatePassword']);
+    Route::put('user/profile', [AuthController::class, 'updateProfile']);
 
-    // Peritajes
+    // Gestión de Usuarios (CRUD completo para listar, crear, editar, etc.)
+    Route::apiResource('users', AuthController::class);
+
+    // Sucursales y Vendedores (Escritura)
+    Route::post('sucursales', [CatalogoController::class, 'storeSucursal']);
+    Route::post('vendedores', [CatalogoController::class, 'storeVendedor']);
+
+    // Peritajes (CRUD completo)
     Route::get('peritajes', [PeritajeController::class, 'index']);
     Route::post('peritajes', [PeritajeController::class, 'store']);
     Route::get('peritajes/{peritaje}', [PeritajeController::class, 'show']);
@@ -53,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('peritajes/{peritaje}/sistemas-mecanicos/{catalogoSistemaId}', [PeritajeItemController::class, 'upsertSistemaMecanico']);
     Route::put('peritajes/{peritaje}/compresion', [PeritajeItemController::class, 'upsertCompresion']);
 
-    // Archivos
+    // Archivos y Firmas
     Route::post('peritajes/{peritaje}/archivos', [PeritajeArchivoController::class, 'store']);
     Route::post('peritajes/{peritaje}/firma', [PeritajeArchivoController::class, 'guardarFirma']);
     Route::delete('archivos/{archivo}', [PeritajeArchivoController::class, 'destroy']);

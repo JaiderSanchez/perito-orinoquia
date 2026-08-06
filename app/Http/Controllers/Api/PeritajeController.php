@@ -105,17 +105,32 @@ class PeritajeController extends Controller
      */
    public function update(\App\Http\Requests\UpdatePeritajeRequest $request, Peritaje $peritaje): JsonResponse
     {
-        // 1. VERIFICACIÓN EN LOGS: Mira esto en tu archivo storage/logs/laravel.log
-        \Illuminate\Support\Facades\Log::info('Datos recibidos en update:', $request->all());
-        \Illuminate\Support\Facades\Log::info('Datos validados:', $request->validated());
+        // 1. Obtenemos todos los datos ya limpios, validados y decodificados por el FormRequest
+        $data = $request->validated();
 
-        $peritaje->update($request->validated());
-
-        if ($request->has('accesorios')) {
-            $peritaje->update(['accesorios' => $request->input('accesorios')]);
+        // 2. Manejo seguro de archivos multimedia (si no mandan nuevos, los eliminamos del array
+        // para que Laravel no sobreescriba la ruta vieja con null o vacíos)
+        if ($request->hasFile('foto_soat')) {
+            $data['foto_soat'] = $request->file('foto_soat')->store('peritajes/soat', 'public');
+        } else {
+            unset($data['foto_soat']);
         }
 
-        return response()->json($peritaje->fresh());
+        if ($request->hasFile('foto_rtm')) {
+            $data['foto_rtm'] = $request->file('foto_rtm')->store('peritajes/rtm', 'public');
+        } else {
+            unset($data['foto_rtm']);
+        }
+
+        // 3. Actualizamos el peritaje con todo el array $data de un solo golpe.
+        // (Esto incluye textos, números, booleanos y todos los arrays de accesorios/daños ya decodificados).
+        $peritaje->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Peritaje actualizado correctamente',
+            'data' => $peritaje->fresh()
+        ]);
     }
 
     /**
@@ -138,10 +153,19 @@ class PeritajeController extends Controller
     }
 
     /** DELETE /api/peritajes/{peritaje} */
-    public function destroy(Request $request, Peritaje $peritaje): JsonResponse
-    {
-        $peritaje->cambiarEstado('anulado', $request->user()->id, 'Peritaje anulado');
+    public function destroy($id)
+{
+    $peritaje = Peritaje::find($id);
 
-        return response()->json(['message' => 'Peritaje anulado'], 200);
+    if (!$peritaje) {
+        return response()->json(['message' => 'No encontrado'], 404);
     }
+
+    $peritaje->delete();
+
+    return response()->json(['success' => true, 'message' => 'Eliminado correctamente'], 200);
+}
+
+
+
 }
