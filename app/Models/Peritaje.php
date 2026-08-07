@@ -41,8 +41,6 @@ class Peritaje extends Model
     {
         parent::boot();
 
-        // Genera el consecutivo PER-0001 automáticamente al crear, usando la
-        // secuencia de Postgres (atómica: segura ante creaciones simultáneas).
         static::creating(function (Peritaje $peritaje) {
             if (empty($peritaje->codigo)) {
                 $siguiente = DB::selectOne("SELECT nextval('peritajes_codigo_seq') AS n")->n;
@@ -50,8 +48,6 @@ class Peritaje extends Model
             }
         });
     }
-
-    // ---------- Relaciones ----------
 
     public function tipoVehiculo()
     {
@@ -118,9 +114,6 @@ class Peritaje extends Model
         return $this->hasMany(PeritajeHistorialEstado::class)->orderByDesc('created_at');
     }
 
-    // ---------- Helpers de dominio ----------
-
-    /** Carga TODAS las relaciones necesarias para armar el PDF completo. */
     public function scopeConDetalleCompleto($query)
     {
         return $query->with([

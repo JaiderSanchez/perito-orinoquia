@@ -9,11 +9,6 @@ class PeritajeCompresionCilindro extends Model
 {
     use HasUuids;
 
-    public $timestamps = false;
-    protected $fillable = ['peritaje_id', 'numero_cilindro', 'presion_psi'];
-
-    public function peritaje()
-    {
-        return $this->belongsTo(Peritaje::class);
-    }
+    protected $table = 'peritaje_compresion_cilindros';
+    protected $guarded = [];
 }

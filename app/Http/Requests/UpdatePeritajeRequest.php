@@ -11,7 +11,6 @@ class UpdatePeritajeRequest extends FormRequest
         return true;
     }
 
-    // <-- AQUÍ ES DONDE DEBES COLOCARLO -->
     protected function prepareForValidation(): void
     {
         // 1. Limpiar cadenas vacías a null
@@ -19,14 +18,38 @@ class UpdatePeritajeRequest extends FormRequest
             return $value === "" ? null : $value;
         })->toArray();
 
-        // 2. Decodificar los campos que viajan como JSON strings desde FormData
-        $camposJson = ['accesorios', 'danos_externos', 'danos_internos', 'detalles_tecnicos', 'sistemas_mecanicos', 'compresion_cilindros'];
+        // 2. Mapeo inteligente para unificar las variantes del frontend (List, camelCase) hacia snake_case de BD
+        $mapeoCampos = [
+            'detallesTecnicosList'   => 'detalles_tecnicos',
+            'detalles_tecnicos'      => 'detalles_tecnicos',
+            'compresionCilindrosList'=> 'compresion_cilindros',
+            'compresion_cilindros'   => 'compresion_cilindros',
+            'danosExternos'          => 'danos_externos',
+            'danos_externos'         => 'danos_externos',
+            'danosInternos'          => 'danos_internos',
+            'danos_internos'         => 'danos_internos',
+            'sistemasMecanicos'      => 'sistemas_mecanicos',
+            'sistemas_mecanicos'     => 'sistemas_mecanicos',
+            'accesoriosList'         => 'accesorios',
+            'accesorios'             => 'accesorios',
+        ];
 
-        foreach ($camposJson as $campo) {
-            if (isset($input[$campo]) && is_string($input[$campo])) {
-                $decoded = json_decode($input[$campo], true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $input[$campo] = $decoded;
+        foreach ($mapeoCampos as $keyFrontend => $keyBd) {
+            if (isset($input[$keyFrontend])) {
+                $valor = $input[$keyFrontend];
+
+                // Decodificar si viaja como JSON string (desde FormData)
+                if (is_string($valor)) {
+                    $decoded = json_decode($valor, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $valor = $decoded;
+                    }
+                }
+
+                $input[$keyBd] = $valor;
+
+                if ($keyFrontend !== $keyBd) {
+                    unset($input[$keyFrontend]);
                 }
             }
         }
@@ -88,7 +111,7 @@ class UpdatePeritajeRequest extends FormRequest
             'score_electrico' => ['sometimes', 'numeric'],
             'score_legal' => ['sometimes', 'numeric'],
 
-            // Arreglos / Listas
+            // Arreglos / Listas (JSON / PostgreSQL)
             'accesorios' => ['nullable', 'array'],
             'danos_externos' => ['nullable', 'array'],
             'danos_internos' => ['nullable', 'array'],
