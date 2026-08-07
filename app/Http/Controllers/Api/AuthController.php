@@ -59,6 +59,43 @@ class AuthController extends Controller
         ], 200);
     }
 
+    /**
+     * Actualizar un usuario específico por ID (Soluciona el error PUT /api/users/{id})
+     */
+    public function update(Request $request, User $user)
+    {
+        if ($request->has('rol')) {
+            $request->merge([
+                'rol' => strtolower(trim($request->rol))
+            ]);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8', // Opcional por si no se modifica la contraseña
+            'rol' => 'required|string|in:tecnico,inspector,admin',
+        ]);
+
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'rol' => $request->rol,
+        ];
+
+        // Solo actualizamos la contraseña si se proporciona una nueva
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'message' => 'Usuario actualizado correctamente',
+            'usuario' => $user
+        ], 200);
+    }
+
     public function login(Request $request)
     {
         $request->validate([
@@ -124,6 +161,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
+            'sucursal_id' => 'required|integer|exists:sucursales,id',
             'rol' => 'required|string|in:tecnico,inspector,admin',
         ]);
 
