@@ -50,7 +50,13 @@ class AuthController extends Controller
 
     public function show(User $user)
     {
-        return response()->json($user, 200);
+        // Cargamos los peritajes asociados al usuario
+        $user->load('peritajes');
+
+        return response()->json([
+            'success' => true,
+            'usuario' => $user
+        ], 200);
     }
 
     public function login(Request $request)
