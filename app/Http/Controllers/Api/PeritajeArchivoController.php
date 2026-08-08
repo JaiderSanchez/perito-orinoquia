@@ -19,11 +19,7 @@ class PeritajeArchivoController extends Controller
 
     /**
      * POST /api/peritajes/{peritaje}/archivos
-     * Sube un archivo real (multipart/form-data) — reemplaza el flujo actual
-     * del frontend que convierte todo a base64 y lo mete en el state.
-     *
-     * Campos esperados: file (binario), categoria, entidad_relacionada_id (opcional,
-     * ej. el id de la fila de peritaje_danos_externos a la que pertenece la foto).
+     * Sube un archivo real (multipart/form-data)
      */
     public function store(Request $request, Peritaje $peritaje): JsonResponse
     {
@@ -53,10 +49,7 @@ class PeritajeArchivoController extends Controller
 
     /**
      * POST /api/peritajes/{peritaje}/firma
-     * Caso especial: la firma llega como imagen base64 (así la produce
-     * react-signature-canvas con canvas.toDataURL()), no como archivo
-     * multipart. La decodificamos y la guardamos igual que cualquier otra
-     * imagen en el storage.
+     * Caso especial: la firma llega como imagen base64.
      */
     public function guardarFirma(Request $request, Peritaje $peritaje): JsonResponse
     {
