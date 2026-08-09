@@ -12,6 +12,7 @@ class Peritaje extends Model
     use HasUuids;
 
     protected $fillable = [
+        'codigo', // <-- Agregado para permitir la asignación automática en el boot
         'tipo_vehiculo_id', 'estado', 'inspector_id', 'sucursal_vendedor_id',
         'sucursal_inspeccion_id', 'vendedor_id', 'fecha_peritaje',
         'placa', 'marca', 'linea', 'modelo_anio', 'num_motor', 'num_chasis',

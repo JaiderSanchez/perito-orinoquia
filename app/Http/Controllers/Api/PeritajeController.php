@@ -77,14 +77,29 @@ class PeritajeController extends Controller
     {
         DB::beginTransaction();
         try {
-            $peritaje = Peritaje::create($request->except([
+            // 1. Obtenemos los datos excluyendo las relaciones secundarias
+            $data = $request->except([
                 'accesorios',
                 'danos_externos',
                 'danos_internos',
                 'detalles_tecnicos',
                 'sistemas_mecanicos',
                 'compresion_cilindros'
-            ]));
+            ]);
+
+            // 2. Asignamos automáticamente el inspector con el usuario autenticado actual
+            $data['inspector_id'] = auth()->id();
+
+            // 3. Valores por defecto temporales para evitar restricciones Not null violation en PostgreSQL
+            $data['marca'] = $data['marca'] ?? 'N/A';
+            $data['linea'] = $data['linea'] ?? 'N/A';
+            $data['modelo_anio'] = $data['modelo_anio'] ?? 0;
+            $data['num_motor'] = $data['num_motor'] ?? 'N/A';
+            $data['num_chasis'] = $data['num_chasis'] ?? 'N/A';
+            $data['organismo_transito'] = $data['organismo_transito'] ?? 'N/A';
+
+            // 4. Creamos el registro principal del peritaje
+            $peritaje = Peritaje::create($data);
 
             if ($request->has('accesorios')) {
                 $peritaje->accesorios()->createMany($request->accesorios);
@@ -146,14 +161,19 @@ class PeritajeController extends Controller
         try {
             $peritaje = Peritaje::findOrFail($id);
 
-            $peritaje->update($request->except([
+            $data = $request->except([
                 'accesorios',
                 'danos_externos',
                 'danos_internos',
                 'detalles_tecnicos',
                 'sistemas_mecanicos',
                 'compresion_cilindros'
-            ]));
+            ]);
+
+            // Opcional: si deseas actualizar el inspector al modificarlo con el usuario en sesión actual
+            // $data['inspector_id'] = auth()->id();
+
+            $peritaje->update($data);
 
             if ($request->has('accesorios')) {
                 $peritaje->accesorios()->delete();
