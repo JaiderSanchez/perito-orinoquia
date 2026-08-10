@@ -28,8 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('user/password', [AuthController::class, 'updatePassword']);
     Route::put('user/profile', [AuthController::class, 'updateProfile']);
 
-    // Gestión de Usuarios (CRUD completo para listar, crear, editar, etc.)
-    Route::apiResource('users', AuthController::class);
+    // Gestión de Usuarios (CRUD completo). Solo administradores: el middleware
+    // 'admin' ya existía registrado en bootstrap/app.php pero nunca se aplicaba.
+    Route::apiResource('users', AuthController::class)->middleware('admin');
 
     // Sucursales y Vendedores (Escritura)
     Route::post('sucursales', [CatalogoController::class, 'storeSucursal']);

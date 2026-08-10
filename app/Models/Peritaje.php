@@ -18,7 +18,9 @@ class Peritaje extends Model
         'placa', 'marca', 'linea', 'modelo_anio', 'num_motor', 'num_chasis',
         'organismo_transito', 'kilometraje', 'tarjeta_operacion', 'configuracion_ejes',
         'numero_soat', 'entidad_emisora_soat', 'vence_soat', 'soat_al_dia',
+        'archivo_soat',
         'numero_control_rtm', 'cda_emisor', 'vence_tecnico_mecanica', 'tecnico_mecanica_al_dia',
+        'archivo_tecnico_mecanica',
         'coincide_propietario_runt', 'tiene_embargos_o_alertas', 'restriccion_blindaje',
         'comentarios_siniestros', 'tipo_transmision', 'estado_transmision', 'comentarios_motor',
         'porcentaje_bateria', 'vida_util_bateria', 'costo_alistamiento', 'costo_reparacion',
@@ -29,8 +31,8 @@ class Peritaje extends Model
 
     protected $casts = [
         'fecha_peritaje' => 'datetime',
-        'vence_soat' => 'date',
-        'vence_tecnico_mecanica' => 'date',
+        'vence_soat' => 'datetime',
+        'vence_tecnico_mecanica' => 'datetime',
         'soat_al_dia' => 'boolean',
         'tecnico_mecanica_al_dia' => 'boolean',
         'coincide_propietario_runt' => 'boolean',

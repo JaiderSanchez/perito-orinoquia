@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('peritaje_accesorios', function (Blueprint $table) {
@@ -70,6 +69,7 @@ return new class extends Migration
             $table->foreignUuid('peritaje_id')->constrained('peritajes')->cascadeOnDelete();
             $table->smallInteger('numero_cilindro');
             $table->smallInteger('presion_psi')->nullable();
+            $table->timestamps();
             $table->unique(['peritaje_id', 'numero_cilindro'], 'uq_peritaje_cilindro');
         });
 

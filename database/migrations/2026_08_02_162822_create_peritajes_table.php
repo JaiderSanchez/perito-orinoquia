@@ -38,6 +38,7 @@ return new class extends Migration
             $table->integer('kilometraje')->nullable();
             $table->string('tarjeta_operacion', 60)->nullable();
             $table->string('configuracion_ejes', 60)->nullable();
+            $table->integer('color', 50)->nullable();
 
             // Documentación legal
             $table->string('numero_soat', 60)->nullable();
