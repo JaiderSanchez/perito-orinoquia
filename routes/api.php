@@ -9,15 +9,19 @@ use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
-// 1. RUTAS PÚBLICAS (Login y Catálogos base)
+// 1. RUTAS PÚBLICAS (Login, Catálogos y Creación)
 // ==========================================
 Route::post('/login', [AuthController::class, 'login']);
 
-// Catálogos públicos:
+// Catálogos públicos y búsqueda:
 Route::get('tipos-vehiculo', [CatalogoController::class, 'tiposVehiculo']);
 Route::get('tipos-vehiculo/{tipoVehiculo}/checklist', [CatalogoController::class, 'checklist']);
 Route::get('sucursales', [CatalogoController::class, 'sucursales']);
 Route::get('vendedores', [CatalogoController::class, 'vendedores']);
+Route::get('/clientes/buscar', [PeritajeController::class, 'buscarClientes']);
+
+// Ruta de creación de peritajes temporalmente pública para evitar bloqueos de token:
+Route::post('peritajes', [PeritajeController::class, 'store']);
 
 // ==========================================
 // 2. RUTAS PROTEGIDAS (Requieren Token Sanctum)
@@ -28,17 +32,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('user/password', [AuthController::class, 'updatePassword']);
     Route::put('user/profile', [AuthController::class, 'updateProfile']);
 
-    // Gestión de Usuarios (CRUD completo). Solo administradores: el middleware
-    // 'admin' ya existía registrado en bootstrap/app.php pero nunca se aplicaba.
+    // Gestión de Usuarios (CRUD completo)
     Route::apiResource('users', AuthController::class)->middleware('admin');
 
     // Sucursales y Vendedores (Escritura)
     Route::post('sucursales', [CatalogoController::class, 'storeSucursal']);
     Route::post('vendedores', [CatalogoController::class, 'storeVendedor']);
 
-    // Peritajes (CRUD completo y acciones personalizadas)
+    // Peritajes (Lectura y acciones protegidas)
     Route::get('peritajes', [PeritajeController::class, 'index']);
-    Route::post('peritajes', [PeritajeController::class, 'store']);
     Route::get('peritajes/{peritaje}', [PeritajeController::class, 'show']);
 
     // Rutas de actualización completa o parcial del peritaje

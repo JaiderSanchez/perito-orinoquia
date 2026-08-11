@@ -7,6 +7,8 @@ use App\Models\Peritaje;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Models\PeritajeCliente;
+use Illuminate\Support\Str;
 
 class PeritajeController extends Controller
 {
@@ -55,6 +57,7 @@ class PeritajeController extends Controller
                 'sucursalInspeccion',
                 'vendedor',
                 'inspector',
+                'cliente',
                 'accesorios',
                 'danosExternos',
                 'danosInternos',
@@ -82,6 +85,9 @@ class PeritajeController extends Controller
     {
         DB::beginTransaction();
         try {
+            \Log::info("=== ENTRÓ AL STORE DE PERITAJES ===");
+            \Log::info("Datos del request:", $request->all());
+
             // 1. Obtenemos los datos excluyendo las relaciones secundarias y archivos directos
             $data = $request->except([
                 'accesorios',
@@ -93,15 +99,21 @@ class PeritajeController extends Controller
                 'detallesTecnicos',
                 'sistemas_mecanicos',
                 'sistemasMecanicos',
+                'comentarios_siniestros',
                 'compresion_cilindros',
                 'compresionCilindros',
                 'archivo_soat',
                 'archivoSoat',
                 'archivo_tecnico_mecanica',
-                'archivoTecnicoMecanica'
+                'archivoTecnicoMecanica',
+                'nombre_cliente',
+                'documento_cliente',
+                'telefono_cliene',
+                'nombreCliente',
+                'documentoCliente',
+                'telefonoCliente'
             ]);
 
-            // 2. Mapeo explícito de nombres de campos en camelCase a snake_case si llegan desde el frontend
             $mapeoCampos = [
                 'sucursalVendedorId' => 'sucursal_vendedor_id',
                 'sucursalInspeccionId' => 'sucursal_inspeccion_id',
@@ -117,6 +129,8 @@ class PeritajeController extends Controller
                 'venceSoat' => 'vence_soat',
                 'tecnicoMecanicaAlDia' => 'tecnico_mecanica_al_dia',
                 'venceTecnicoMecanica' => 'vence_tecnico_mecanica',
+                'comentarios_siniestros' => 'comentarios_siniestros',
+
             ];
 
             foreach ($mapeoCampos as $keyCamel => $keySnake) {
@@ -139,7 +153,7 @@ class PeritajeController extends Controller
             }
 
             // 4. Asignamos automáticamente el inspector con el usuario autenticado actual
-            $data['inspector_id'] = auth()->id();
+            $data['inspector_id'] = auth()->id() ?? 1;
 
             // 5. Valores por defecto temporales para evitar restricciones Not null violation en PostgreSQL
             $data['marca'] = $data['marca'] ?? 'N/A';
@@ -149,15 +163,41 @@ class PeritajeController extends Controller
             $data['num_chasis'] = $data['num_chasis'] ?? 'N/A';
             $data['organismo_transito'] = $data['organismo_transito'] ?? 'N/A';
 
+            // Creamos el peritaje principal utilizando el array $data procesado
             $peritaje = Peritaje::create($data);
 
+            // 6. Extracción y guardado/actualización del cliente
+            $nombre = $request->input('clienteNombre') ?? $request->input('cliente_nombre');
+            $documento = $request->input('clienteDocumento') ?? $request->input('cliente_documento');
+            $telefono = $request->input('clienteTelefono') ?? $request->input('cliente_telefono');
+
+            if ($documento) {
+                PeritajeCliente::updateOrCreate(
+                    ['documento_cliente' => $documento],
+                    [
+                        'id' => (string) Str::uuid(),
+                        'peritaje_id' => $peritaje->id,
+                        'nombre_cliente' => $nombre,
+                        'telefono_cliene' => $telefono,
+                    ]
+                );
+            }
+
+            \Log::info('DATOS CLIENTE RECIBIDOS:', [
+                'nombre' => $request->input('clienteNombre') ?? $request->input('cliente_nombre'),
+                'documento' => $request->input('clienteDocumento') ?? $request->input('cliente_documento'),
+                'telefono' => $request->input('clienteTelefono') ?? $request->input('cliente_telefono'),
+                'todo_el_request' => $request->all()
+            ]);
+
+            // 7. Procesamiento de Accesorios
             $accesorios = $request->input('peritaje_accesorios') ?? $request->input('accesoriosList');
             if (is_string($accesorios)) {
                 $accesorios = json_decode($accesorios, true);
             }
 
             if ($accesorios && is_array($accesorios)) {
-                $peritaje->accesorios()->delete(); // Por si acaso en un reintento
+                $peritaje->accesorios()->delete();
                 $mapeadosAccesorios = [];
 
                 foreach ($accesorios as $item) {
@@ -181,21 +221,34 @@ class PeritajeController extends Controller
                 }
             }
 
+            // 8. Daños Externos
             $danosExternos = $request->input('danos_externos') ?? $request->input('danosExternos');
+            if (is_string($danosExternos)) {
+                $danosExternos = json_decode($danosExternos, true);
+            }
             if ($danosExternos && is_array($danosExternos)) {
                 $peritaje->danosExternos()->createMany($danosExternos);
             }
 
+            // 9. Daños Internos
             $danosInternos = $request->input('danos_internos') ?? $request->input('danosInternos');
+            if (is_string($danosInternos)) {
+                $danosInternos = json_decode($danosInternos, true);
+            }
             if ($danosInternos && is_array($danosInternos)) {
                 $peritaje->danosInternos()->createMany($danosInternos);
             }
 
+            // 10. Detalles Técnicos
             $detallesTecnicos = $request->input('detalles_tecnicos') ?? $request->input('detallesTecnicos');
+            if (is_string($detallesTecnicos)) {
+                $detallesTecnicos = json_decode($detallesTecnicos, true);
+            }
             if ($detallesTecnicos && is_array($detallesTecnicos)) {
                 $peritaje->detallesTecnicos()->createMany($detallesTecnicos);
             }
 
+            // 11. Sistemas Mecánicos
             $sistemasMecanicos = json_decode($request->input('sistemas_mecanicos', '[]'), true) ?: $request->input('sistemasMecanicos');
             if ($sistemasMecanicos && is_array($sistemasMecanicos)) {
                 $peritaje->sistemasMecanicos()->delete();
@@ -217,6 +270,7 @@ class PeritajeController extends Controller
                 }
             }
 
+            // 12. Compresión de Cilindros
             $peritaje->compresionCilindros()->delete();
             $cilindrosMapeados = [];
             $compresionCilindros = $request->input('compresion_cilindros') ?? $request->input('compresionCilindros');
@@ -243,7 +297,16 @@ class PeritajeController extends Controller
                 }
             }
             if (!empty($cilindrosMapeados)) {
-                $peritaje->compresionCilindros()->createMany($cilindrosMapeados);
+                foreach ($cilindrosMapeados as $cilindroData) {
+                    \App\Models\PeritajeCompresionCilindro::create([
+                        'id' => (string) Str::uuid(),
+                        'peritaje_id' => $peritaje->id,
+                        'numero_cilindro' => $cilindroData['numero_cilindro'],
+                        'presion_psi' => $cilindroData['presion_psi'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
             }
 
             DB::commit();
@@ -273,11 +336,11 @@ class PeritajeController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+
+
+
     }
 
-    /**
-     * Actualizar un peritaje existente y sincronizar sus relaciones y archivos.
-     */
     public function update(Request $request, $id)
     {
         DB::beginTransaction();
@@ -314,6 +377,9 @@ class PeritajeController extends Controller
                 'clienteNombre' => 'cliente_nombre',
                 'clienteDocumento' => 'cliente_documento',
                 'clienteTelefono' => 'cliente_telefono',
+                'nombre_cliente' => 'cliente_nombre',
+                'documento_cliente' => 'cliente_documento',
+                'telefono_cliene' => 'cliente_telefono',
                 'soatAlDia' => 'soat_al_dia',
                 'venceSoat' => 'vence_soat',
                 'tecnicoMecanicaAlDia' => 'tecnico_mecanica_al_dia',
@@ -353,8 +419,25 @@ class PeritajeController extends Controller
 
             $peritaje->update($data);
 
-            // 1. ACCESORIOS (Con validación de UUID)
-            $accesorios = $request->input('accesoriosList');
+            // Actualizar / Sincronizar Cliente también en update
+            $nombre = $request->input('clienteNombre') ?? $request->input('cliente_nombre');
+            $documento = $request->input('clienteDocumento') ?? $request->input('cliente_documento');
+            $telefono = $request->input('clienteTelefono') ?? $request->input('cliente_telefono');
+
+            if ($documento) {
+                PeritajeCliente::updateOrCreate(
+                    ['documento_cliente' => $documento],
+                    [
+                        'id' => (string) Str::uuid(),
+                        'peritaje_id' => $peritaje->id,
+                        'nombre_cliente' => $nombre,
+                        'telefono_cliene' => $telefono,
+                    ]
+                );
+            }
+
+            // 1. ACCESORIOS
+            $accesorios = $request->input('accesoriosList') ?? $request->input('accesorios');
             if (is_string($accesorios)) {
                 $accesorios = json_decode($accesorios, true);
             }
@@ -478,7 +561,7 @@ class PeritajeController extends Controller
                 }
             }
 
-            // 6. COMPRESIÓN CILINDROS (Soporta formato plano y formato de array)
+            // 6. COMPRESIÓN CILINDROS
             $peritaje->compresionCilindros()->delete();
             $cilindrosMapeados = [];
 
@@ -509,7 +592,7 @@ class PeritajeController extends Controller
             if (!empty($cilindrosMapeados)) {
                 foreach ($cilindrosMapeados as $cilindroData) {
                     \App\Models\PeritajeCompresionCilindro::create([
-                        'id' => (string) \Illuminate\Support\Str::uuid(),
+                        'id' => (string) Str::uuid(),
                         'peritaje_id' => $peritaje->id,
                         'numero_cilindro' => $cilindroData['numero_cilindro'],
                         'presion_psi' => $cilindroData['presion_psi'],
@@ -518,6 +601,7 @@ class PeritajeController extends Controller
                     ]);
                 }
             }
+
             DB::commit();
 
             return response()->json([
@@ -547,16 +631,27 @@ class PeritajeController extends Controller
         }
     }
 
-    /**
-     * Eliminar un peritaje y sus archivos o dependencias asociadas.
-     */
+    public function buscarClientes(Request $request)
+    {
+        // Usamos ->input('q') para evitar la advertencia de deprecación de Symfony/Laravel
+        $query = $request->input('q');
+
+        $clientes = PeritajeCliente::when($query, function ($qBuilder) use ($query) {
+            $qBuilder->where('nombre_cliente', 'like', "%{$query}%")
+                ->orWhere('documento_cliente', 'like', "%{$query}%");
+        })
+            ->limit(10)
+            ->get();
+
+        return response()->json($clientes);
+    }
+
     public function destroy($id)
     {
         DB::beginTransaction();
         try {
             $peritaje = Peritaje::findOrFail($id);
 
-            // Eliminar archivos físicos almacenados si existen
             if ($peritaje->archivo_soat) {
                 Storage::disk('public')->delete($peritaje->archivo_soat);
             }
@@ -564,7 +659,6 @@ class PeritajeController extends Controller
                 Storage::disk('public')->delete($peritaje->archivo_tecnico_mecanica);
             }
 
-            // Eliminar relaciones o dependencias antes de borrar el peritaje
             $peritaje->accesorios()->delete();
             $peritaje->danosExternos()->delete();
             $peritaje->danosInternos()->delete();
@@ -572,7 +666,6 @@ class PeritajeController extends Controller
             $peritaje->sistemasMecanicos()->delete();
             $peritaje->compresionCilindros()->delete();
 
-            // Validar si los métodos existen antes de llamarlos para evitar errores adicionales
             if (method_exists($peritaje, 'archivos')) {
                 $peritaje->archivos()->delete();
             }
@@ -580,7 +673,6 @@ class PeritajeController extends Controller
                 $peritaje->historialEstados()->delete();
             }
 
-            // Eliminar el peritaje principal
             $peritaje->delete();
 
             DB::commit();

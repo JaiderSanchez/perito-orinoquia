@@ -13,20 +13,57 @@ class Peritaje extends Model
 
     protected $fillable = [
         'codigo', // <-- Agregado para permitir la asignación automática en el boot
-        'tipo_vehiculo_id', 'estado', 'inspector_id', 'sucursal_vendedor_id',
-        'sucursal_inspeccion_id', 'vendedor_id', 'fecha_peritaje',
-        'placa', 'marca', 'linea', 'modelo_anio', 'num_motor', 'num_chasis',
-        'organismo_transito', 'kilometraje', 'tarjeta_operacion', 'configuracion_ejes',
-        'numero_soat', 'entidad_emisora_soat', 'vence_soat', 'soat_al_dia',
+        'tipo_vehiculo_id',
+        'estado',
+        'inspector_id',
+        'sucursal_vendedor_id',
+        'sucursal_inspeccion_id',
+        'vendedor_id',
+        'fecha_peritaje',
+        'placa',
+        'marca',
+        'linea',
+        'color',
+        'modelo_anio',
+        'num_motor',
+        'num_chasis',
+        'organismo_transito',
+        'kilometraje',
+        'tarjeta_operacion',
+        'configuracion_ejes',
+        'numero_soat',
+        'entidad_emisora_soat',
+        'vence_soat',
+        'soat_al_dia',
         'archivo_soat',
-        'numero_control_rtm', 'cda_emisor', 'vence_tecnico_mecanica', 'tecnico_mecanica_al_dia',
-        'archivo_tecnico_mecanica',
-        'coincide_propietario_runt', 'tiene_embargos_o_alertas', 'restriccion_blindaje',
-        'comentarios_siniestros', 'tipo_transmision', 'estado_transmision', 'comentarios_motor',
-        'porcentaje_bateria', 'vida_util_bateria', 'costo_alistamiento', 'costo_reparacion',
-        'tiempo_estimado_reparacion', 'estado_general_vehiculo', 'concepto_final',
-        'comentarios_generales', 'score_estructura', 'score_carroceria', 'score_mecanica',
-        'score_electrico', 'score_legal', 'firmado_en',
+        'numero_control_rtm',
+        'cda_emisor',
+        'vence_tecnico_mecanica',
+        'tecnico_mecanica_al_dia',
+        'nombre_cliente',
+        'documento_cliente',
+        'telefono_cliene',
+        'coincide_propietario_runt',
+        'tiene_embargos_o_alertas',
+        'restriccion_blindaje',
+        'comentarios_siniestros',
+        'tipo_transmision',
+        'estado_transmision',
+        'comentarios_motor',
+        'porcentaje_bateria',
+        'vida_util_bateria',
+        'costo_alistamiento',
+        'costo_reparacion',
+        'tiempo_estimado_reparacion',
+        'estado_general_vehiculo',
+        'concepto_final',
+        'comentarios_generales',
+        'score_estructura',
+        'score_carroceria',
+        'score_mecanica',
+        'score_electrico',
+        'score_legal',
+        'firmado_en',
     ];
 
     protected $casts = [
@@ -41,16 +78,20 @@ class Peritaje extends Model
     ];
 
     protected static function boot()
-    {
-        parent::boot();
+{
+    parent::boot();
 
-        static::creating(function (Peritaje $peritaje) {
-            if (empty($peritaje->codigo)) {
-                $siguiente = DB::selectOne("SELECT nextval('peritajes_codigo_seq') AS n")->n;
-                $peritaje->codigo = 'PER-' . str_pad($siguiente, 4, '0', STR_PAD_LEFT);
-            }
-        });
-    }
+    static::creating(function ($peritaje) {
+        if (empty($peritaje->codigo)) {
+            // Ejemplo de generación automática utilizando el ID de la secuencia o un prefijo
+            $secuencia = DB::getDriverName() === 'pgsql'
+                ? DB::select("SELECT nextval('peritajes_codigo_seq') as id")[0]->id
+                : uniqid();
+
+            $peritaje->codigo = 'PER-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT);
+        }
+    });
+}
 
     public function tipoVehiculo()
     {
@@ -60,6 +101,10 @@ class Peritaje extends Model
     public function inspector()
     {
         return $this->belongsTo(User::class, 'inspector_id');
+    }
+    public function cliente()
+    {
+        return $this->hasOne(PeritajeCliente::class, 'peritaje_id', 'id');
     }
 
     public function sucursalVendedor()
@@ -74,32 +119,32 @@ class Peritaje extends Model
 
     public function vendedor()
     {
-        return $this->belongsTo(Vendedor::class);
+        return $this->belongsTo(Vendedor::class, 'vendedor_id');
     }
 
     public function accesorios()
     {
-        return $this->hasMany(PeritajeAccesorio::class);
+        return $this->hasMany(PeritajeAccesorio::class, 'peritaje_accesorios.peritaje_id');
     }
 
     public function danosExternos()
     {
-        return $this->hasMany(PeritajeDanoExterno::class);
+        return $this->hasMany(PeritajeDanoExterno::class, 'peritaje_danos_externos.peritaje_id');
     }
 
     public function danosInternos()
     {
-        return $this->hasMany(PeritajeDanoInterno::class);
+        return $this->hasMany(PeritajeDanoInterno::class, 'peritaje_danos_internos.peritaje_id');
     }
 
     public function detallesTecnicos()
     {
-        return $this->hasMany(PeritajeDetalleTecnico::class);
+        return $this->hasMany(PeritajeDetalleTecnico::class, 'peritaje_detalles_tecnicos.peritaje_id');
     }
 
     public function sistemasMecanicos()
     {
-        return $this->hasMany(PeritajeSistemaMecanico::class);
+        return $this->hasMany(PeritajeSistemaMecanico::class, 'peritaje_sistemas_mecanicos.peritaje_id');
     }
 
     public function compresionCilindros()

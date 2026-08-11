@@ -5,12 +5,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
-        // Secuencia atómica para el consecutivo PER-0001, PER-0002... (evita
-        // condiciones de carrera si dos inspectores crean un peritaje a la vez).
         DB::statement('CREATE SEQUENCE IF NOT EXISTS peritajes_codigo_seq START 1');
 
         Schema::create('peritajes', function (Blueprint $table) {
@@ -18,7 +15,7 @@ return new class extends Migration
             $table->string('codigo', 20)->unique();
 
             $table->foreignUuid('tipo_vehiculo_id')->constrained('tipos_vehiculo');
-            $table->string('estado', 20)->default('borrador'); // borrador|en_proceso|completado|anulado
+            $table->string('estado', 20)->default('borrador');
 
             $table->foreignId('inspector_id')->constrained('users');
             $table->foreignUuid('sucursal_vendedor_id')->nullable()->constrained('sucursales')->nullOnDelete();
@@ -32,31 +29,36 @@ return new class extends Migration
             $table->string('marca', 80);
             $table->string('linea', 80);
             $table->smallInteger('modelo_anio');
+            $table->string('color')->nullable();
             $table->string('num_motor', 60);
             $table->string('num_chasis', 60);
             $table->string('organismo_transito', 120)->nullable();
             $table->integer('kilometraje')->nullable();
             $table->string('tarjeta_operacion', 60)->nullable();
             $table->string('configuracion_ejes', 60)->nullable();
-            $table->integer('color', 50)->nullable();
-
-            // Documentación legal
             $table->string('numero_soat', 60)->nullable();
             $table->string('entidad_emisora_soat', 120)->nullable();
             $table->date('vence_soat')->nullable();
             $table->boolean('soat_al_dia')->default(true);
+            $table->string('archivo_soat', 255)->nullable(); // Añadido para el archivo adjunto del SOAT
+
+            // Información del Cliente
+            $table->string('nombre_cliente', 120)->nullable();
+            $table->string('documento_cliente', 120)->nullable();
+            $table->string('telefono_cliente', 120)->nullable(); // Corregido de telefono_cliene
 
             $table->string('numero_control_rtm', 60)->nullable();
             $table->string('cda_emisor', 120)->nullable();
             $table->date('vence_tecnico_mecanica')->nullable();
             $table->boolean('tecnico_mecanica_al_dia')->default(true);
+            $table->string('archivo_tecnico_mecanica', 255)->nullable(); // Añadido para el archivo adjunto de RTM
 
             $table->boolean('coincide_propietario_runt')->default(true);
             $table->boolean('tiene_embargos_o_alertas')->default(false);
             $table->string('restriccion_blindaje', 40)->default('sin_blindaje');
             $table->text('comentarios_siniestros')->nullable();
 
-            // Motor (parámetros globales)
+            // Motor
             $table->string('tipo_transmision', 40)->nullable();
             $table->string('estado_transmision', 40)->nullable();
             $table->text('comentarios_motor')->nullable();
@@ -108,3 +110,4 @@ return new class extends Migration
         DB::statement('DROP SEQUENCE IF EXISTS peritajes_codigo_seq');
     }
 };
+
