@@ -151,7 +151,7 @@ class PeritajeController extends Controller
 
             $peritaje = Peritaje::create($data);
 
-            $accesorios = $request->input('accesorios') ?? $request->input('accesoriosList');
+            $accesorios = $request->input('peritaje_accesorios') ?? $request->input('accesoriosList');
             if (is_string($accesorios)) {
                 $accesorios = json_decode($accesorios, true);
             }
@@ -167,11 +167,11 @@ class PeritajeController extends Controller
                     if ($catId && (preg_match('/^[0-9a-fA-F-]{36}$/', $catId) || is_numeric($catId))) {
                         $mapeadosAccesorios[] = [
                             'catalogo_accesorio_id' => $catId,
-                            'presente'              => $dataItem['presente'] ?? 0,
-                            'seleccion'             => $dataItem['seleccion'] ?? 0,
-                            'danado'                => $dataItem['danado'] ?? 0,
-                            'costo_reparacion'      => $dataItem['costo_reparacion'] ?? 0,
-                            'comentario_dano'       => $dataItem['comentario_dano'] ?? null,
+                            'presente' => $dataItem['presente'] ?? 0,
+                            'seleccion' => $dataItem['seleccion'] ?? 0,
+                            'danado' => $dataItem['danado'] ?? 0,
+                            'costo_reparacion' => $dataItem['costo_reparacion'] ?? 0,
+                            'comentario_dano' => $dataItem['comentario_dano'] ?? null,
                         ];
                     }
                 }
@@ -354,7 +354,7 @@ class PeritajeController extends Controller
             $peritaje->update($data);
 
             // 1. ACCESORIOS (Con validación de UUID)
-            $accesorios = $request->input('accesorios');
+            $accesorios = $request->input('accesoriosList');
             if (is_string($accesorios)) {
                 $accesorios = json_decode($accesorios, true);
             }
@@ -366,8 +366,13 @@ class PeritajeController extends Controller
                     if ($catId && (preg_match('/^[0-9a-fA-F-]{36}$/', $catId) || is_numeric($catId))) {
                         $mapeados[] = [
                             'catalogo_accesorio_id' => $catId,
-                            'presente' => $item['presente'] ?? 0,
-                            'danado' => $item['danado'] ?? 0,
+                            'presente' => isset($item['presente']) ? (int) $item['presente'] : 0,
+                            'seleccion' => isset($item['seleccion']) ? (int) $item['seleccion'] : 0,
+                            'danado' => isset($item['danado']) ? (int) $item['danado'] : 0,
+                            'costo_reparacion' => isset($item['costo_reparacion']) ? (int) $item['costo_reparacion'] : 0,
+                            'comentario_dano' => isset($item['comentario_dano']) ? $item['comentario_dano'] : null,
+                            'created_at' => now(),
+                            'updated_at' => now(),
                         ];
                     }
                 }

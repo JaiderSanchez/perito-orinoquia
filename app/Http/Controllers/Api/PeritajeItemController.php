@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Peritaje;
+use App\Models\PeritajeAccesorio;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,23 +14,30 @@ class PeritajeItemController extends Controller
      * PUT /api/peritajes/{peritaje}/accesorios/{catalogoAccesorio}
      * Equivale a "handleItemChange" en Accesorios.jsx.
      */
-    public function upsertAccesorio(Request $request, Peritaje $peritaje, string $catalogoAccesorioId): JsonResponse
-    {
-        $data = $request->validate([
-            'presente' => ['nullable', 'boolean'],
-            'seleccion' => ['nullable', 'string', 'max:60'],
-            'danado' => ['required', 'boolean'],
-            'costo_reparacion' => ['nullable', 'numeric', 'min:0'],
-            'comentario_dano' => ['nullable', 'string'],
-        ]);
+   public function upsertAccesorio(Request $request, $peritajeId, $catalogoAccesorioId)
+{
+    $validated = $request->validate([
+        'presente' => 'nullable|boolean',
+        'seleccion' => 'nullable|boolean',
+        'danado' => 'nullable|boolean',
+        'costo_reparacion' => 'nullable|numeric',
+        'comentario_dano' => 'nullable|string',
+    ]);
 
-        $item = $peritaje->accesorios()->updateOrCreate(
-            ['catalogo_accesorio_id' => $catalogoAccesorioId],
-            $data
-        );
+    $accesorio = PeritajeAccesorio::updateOrCreate(
+        [
+            'peritaje_id' => $peritajeId,
+            'catalogo_accesorio_id' => $catalogoAccesorioId,
+        ],
+        $validated
+    );
 
-        return response()->json($item);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Accesorio actualizado correctamente',
+        'data' => $accesorio
+    ]);
+}
 
     /**
      * PUT /api/peritajes/{peritaje}/danos-externos/{catalogoPieza}
