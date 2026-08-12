@@ -91,6 +91,8 @@ class PeritajeController extends Controller
             // 1. Obtenemos los datos excluyendo las relaciones secundarias y archivos directos
             $data = $request->except([
                 'accesorios',
+                'accesoriosList',
+                'peritaje_accesorios',
                 'danos_externos',
                 'danosExternos',
                 'danos_internos',
@@ -130,7 +132,6 @@ class PeritajeController extends Controller
                 'tecnicoMecanicaAlDia' => 'tecnico_mecanica_al_dia',
                 'venceTecnicoMecanica' => 'vence_tecnico_mecanica',
                 'comentarios_siniestros' => 'comentarios_siniestros',
-
             ];
 
             foreach ($mapeoCampos as $keyCamel => $keySnake) {
@@ -182,16 +183,7 @@ class PeritajeController extends Controller
                     ]
                 );
             }
-
-            \Log::info('DATOS CLIENTE RECIBIDOS:', [
-                'nombre' => $request->input('clienteNombre') ?? $request->input('cliente_nombre'),
-                'documento' => $request->input('clienteDocumento') ?? $request->input('cliente_documento'),
-                'telefono' => $request->input('clienteTelefono') ?? $request->input('cliente_telefono'),
-                'todo_el_request' => $request->all()
-            ]);
-
-            // 7. Procesamiento de Accesorios
-            $accesorios = $request->input('peritaje_accesorios') ?? $request->input('accesoriosList');
+            $accesorios = $request->input('peritaje_accesorios') ?? $request->input('accesoriosList') ?? $request->input('accesorios', []);
             if (is_string($accesorios)) {
                 $accesorios = json_decode($accesorios, true);
             }
@@ -200,19 +192,55 @@ class PeritajeController extends Controller
                 $peritaje->accesorios()->delete();
                 $mapeadosAccesorios = [];
 
+                // Obtenemos el tipo de vehículo del request actual para asociarlo si toca crear el accesorio
+                $tipoVehiculoId = $request->input('tipo_vehiculo_id') ?? $request->input('tipoVehiculoId') ?? $peritaje->tipo_vehiculo_id ?? null;
+
                 foreach ($accesorios as $item) {
                     $dataItem = is_array($item) ? $item : [];
-                    $catId = $dataItem['catalogo_accesorio_id'] ?? $dataItem['id'] ?? null;
+                    $frontendId = $dataItem['id'] ?? $dataItem['catalogo_accesorio_id'] ?? null;
 
-                    if ($catId && (preg_match('/^[0-9a-fA-F-]{36}$/', $catId) || is_numeric($catId))) {
-                        $mapeadosAccesorios[] = [
-                            'catalogo_accesorio_id' => $catId,
-                            'presente' => $dataItem['presente'] ?? 0,
-                            'seleccion' => $dataItem['seleccion'] ?? 0,
-                            'danado' => $dataItem['danado'] ?? 0,
-                            'costo_reparacion' => $dataItem['costo_reparacion'] ?? 0,
-                            'comentario_dano' => $dataItem['comentario_dano'] ?? null,
-                        ];
+                    if ($frontendId) {
+                        $catalogoAccesorio = null;
+
+                        // 1. Buscar por UUID
+                        if (preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/', $frontendId)) {
+                            $catalogoAccesorio = \App\Models\CatalogoAccesorio::find($frontendId);
+                        }
+
+                        // 2. Buscar por código o slug
+                        if (!$catalogoAccesorio) {
+                            $catalogoAccesorio = \App\Models\CatalogoAccesorio::where('codigo', $frontendId)
+                                ->orWhere('slug', $frontendId)
+                                ->first();
+                        }
+
+                        // 3. Si no existe en el catálogo, lo creamos asegurando el tipo_vehiculo_id
+                        if (!$catalogoAccesorio && isset($dataItem['name'])) {
+                            $catalogoAccesorio = \App\Models\CatalogoAccesorio::create([
+                                'id' => (string) Str::uuid(),
+                                'nombre' => $dataItem['name'],
+                                'codigo' => $frontendId,
+                                'slug' => $frontendId,
+                                'tipo_vehiculo_id' => $tipoVehiculoId, // <--- Evita el error de columna nula
+                                'activo' => true
+                            ]);
+                        }
+
+                        // Si ya lo encontramos o lo acabamos de crear, lo asociamos al peritaje
+                        if ($catalogoAccesorio) {
+                            $mapeadosAccesorios[] = [
+                                'id' => (string) Str::uuid(),
+                                'peritaje_id' => $peritaje->id,
+                                'catalogo_accesorio_id' => $catalogoAccesorio->id, // Este va a peritaje_accesorios
+                                'presente' => filter_var($dataItem['presente'] ?? true, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                                'seleccion' => $dataItem['seleccion'] ?? null,
+                                'danado' => filter_var($dataItem['danado'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                                'costo_reparacion' => (int) ($dataItem['costoReparacion'] ?? $dataItem['costo_reparacion'] ?? 0),
+                                'comentario_dano' => $dataItem['comentarioDaño'] ?? $dataItem['comentario_dano'] ?? null,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                        }
                     }
                 }
 
@@ -249,11 +277,14 @@ class PeritajeController extends Controller
             }
 
             // 11. Sistemas Mecánicos
-            $sistemasMecanicos = json_decode($request->input('sistemas_mecanicos', '[]'), true) ?: $request->input('sistemasMecanicos');
+            $sistemasMecanicos = $request->input('sistemas_mecanicos') ?? $request->input('sistemasMecanicos');
+            if (is_string($sistemasMecanicos)) {
+                $sistemasMecanicos = json_decode($sistemasMecanicos, true);
+            }
             if ($sistemasMecanicos && is_array($sistemasMecanicos)) {
                 $peritaje->sistemasMecanicos()->delete();
                 $mapeados = [];
-                foreach ($sistemasMecanicos as $key => $item) {
+                foreach ($sistemasMecanicos as $item) {
                     $dataItem = is_array($item) ? $item : [];
                     $catId = $dataItem['catalogo_sistema_id'] ?? $dataItem['id'] ?? null;
 
@@ -336,9 +367,6 @@ class PeritajeController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-
-
-
     }
 
     public function update(Request $request, $id)
@@ -349,6 +377,8 @@ class PeritajeController extends Controller
 
             $data = $request->except([
                 'accesorios',
+                'accesoriosList',
+                'peritaje_accesorios',
                 'danos_externos',
                 'danosExternos',
                 'danos_internos',
@@ -365,7 +395,6 @@ class PeritajeController extends Controller
                 'archivoTecnicoMecanica'
             ]);
 
-            // Mapeo explícito de campos en camelCase a snake_case
             $mapeoCampos = [
                 'sucursalVendedorId' => 'sucursal_vendedor_id',
                 'sucursalInspeccionId' => 'sucursal_inspeccion_id',
@@ -392,7 +421,6 @@ class PeritajeController extends Controller
                 }
             }
 
-            // Manejo de actualización de archivos
             if ($request->hasFile('archivo_soat')) {
                 if ($peritaje->archivo_soat) {
                     Storage::disk('public')->delete($peritaje->archivo_soat);
@@ -419,7 +447,6 @@ class PeritajeController extends Controller
 
             $peritaje->update($data);
 
-            // Actualizar / Sincronizar Cliente también en update
             $nombre = $request->input('clienteNombre') ?? $request->input('cliente_nombre');
             $documento = $request->input('clienteDocumento') ?? $request->input('cliente_documento');
             $telefono = $request->input('clienteTelefono') ?? $request->input('cliente_telefono');
@@ -428,7 +455,6 @@ class PeritajeController extends Controller
                 PeritajeCliente::updateOrCreate(
                     ['documento_cliente' => $documento],
                     [
-                        'id' => (string) Str::uuid(),
                         'peritaje_id' => $peritaje->id,
                         'nombre_cliente' => $nombre,
                         'telefono_cliene' => $telefono,
@@ -436,31 +462,70 @@ class PeritajeController extends Controller
                 );
             }
 
-            // 1. ACCESORIOS
-            $accesorios = $request->input('accesoriosList') ?? $request->input('accesorios');
+            // Accesorios
+            $accesorios = $request->input('peritaje_accesorios') ?? $request->input('accesoriosList') ?? $request->input('accesorios', []);
             if (is_string($accesorios)) {
                 $accesorios = json_decode($accesorios, true);
             }
+
             if ($accesorios && is_array($accesorios)) {
                 $peritaje->accesorios()->delete();
-                $mapeados = [];
+                $mapeadosAccesorios = [];
+
+                // Obtenemos el tipo de vehículo del request actual para asociarlo si toca crear el accesorio
+                $tipoVehiculoId = $request->input('tipo_vehiculo_id') ?? $request->input('tipoVehiculoId') ?? $peritaje->tipo_vehiculo_id ?? null;
+
                 foreach ($accesorios as $item) {
-                    $catId = $item['catalogo_accesorio_id'] ?? $item['id'] ?? null;
-                    if ($catId && (preg_match('/^[0-9a-fA-F-]{36}$/', $catId) || is_numeric($catId))) {
-                        $mapeados[] = [
-                            'catalogo_accesorio_id' => $catId,
-                            'presente' => isset($item['presente']) ? (int) $item['presente'] : 0,
-                            'seleccion' => isset($item['seleccion']) ? (int) $item['seleccion'] : 0,
-                            'danado' => isset($item['danado']) ? (int) $item['danado'] : 0,
-                            'costo_reparacion' => isset($item['costo_reparacion']) ? (int) $item['costo_reparacion'] : 0,
-                            'comentario_dano' => isset($item['comentario_dano']) ? $item['comentario_dano'] : null,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
+                    $dataItem = is_array($item) ? $item : [];
+                    $frontendId = $dataItem['id'] ?? $dataItem['catalogo_accesorio_id'] ?? null;
+
+                    if ($frontendId) {
+                        $catalogoAccesorio = null;
+
+                        // 1. Buscar por UUID
+                        if (preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/', $frontendId)) {
+                            $catalogoAccesorio = \App\Models\CatalogoAccesorio::find($frontendId);
+                        }
+
+                        // 2. Buscar por código o slug
+                        if (!$catalogoAccesorio) {
+                            $catalogoAccesorio = \App\Models\CatalogoAccesorio::where('codigo', $frontendId)
+                                ->orWhere('slug', $frontendId)
+                                ->first();
+                        }
+
+                        // 3. Si no existe en el catálogo, lo creamos asegurando el tipo_vehiculo_id
+                        if (!$catalogoAccesorio && isset($dataItem['name'])) {
+                            $catalogoAccesorio = \App\Models\CatalogoAccesorio::create([
+                                'id' => (string) Str::uuid(),
+                                'nombre' => $dataItem['name'],
+                                'codigo' => $frontendId,
+                                'slug' => $frontendId,
+                                'tipo_vehiculo_id' => $tipoVehiculoId, // <--- Evita el error de columna nula
+                                'activo' => true
+                            ]);
+                        }
+
+                        // Si ya lo encontramos o lo acabamos de crear, lo asociamos al peritaje
+                        if ($catalogoAccesorio) {
+                            $mapeadosAccesorios[] = [
+                                'id' => (string) Str::uuid(),
+                                'peritaje_id' => $peritaje->id,
+                                'catalogo_accesorio_id' => $catalogoAccesorio->id, // Este va a peritaje_accesorios
+                                'presente' => filter_var($dataItem['presente'] ?? true, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                                'seleccion' => $dataItem['seleccion'] ?? null,
+                                'danado' => filter_var($dataItem['danado'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                                'costo_reparacion' => (int) ($dataItem['costoReparacion'] ?? $dataItem['costo_reparacion'] ?? 0),
+                                'comentario_dano' => $dataItem['comentarioDaño'] ?? $dataItem['comentario_dano'] ?? null,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                        }
                     }
                 }
-                if (!empty($mapeados)) {
-                    $peritaje->accesorios()->createMany($mapeados);
+
+                if (!empty($mapeadosAccesorios)) {
+                    $peritaje->accesorios()->createMany($mapeadosAccesorios);
                 }
             }
 
@@ -543,7 +608,7 @@ class PeritajeController extends Controller
                 $peritaje->sistemasMecanicos()->delete();
                 $mapeados = [];
 
-                foreach ($sistemasMecanicos as $key => $item) {
+                foreach ($sistemasMecanicos as $item) {
                     $dataItem = is_array($item) ? $item : [];
                     $catId = $dataItem['catalogo_sistema_id'] ?? $dataItem['id'] ?? null;
 
@@ -633,7 +698,6 @@ class PeritajeController extends Controller
 
     public function buscarClientes(Request $request)
     {
-        // Usamos ->input('q') para evitar la advertencia de deprecación de Symfony/Laravel
         $query = $request->input('q');
 
         $clientes = PeritajeCliente::when($query, function ($qBuilder) use ($query) {

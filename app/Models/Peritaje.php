@@ -78,20 +78,20 @@ class Peritaje extends Model
     ];
 
     protected static function boot()
-{
-    parent::boot();
+    {
+        parent::boot();
 
-    static::creating(function ($peritaje) {
-        if (empty($peritaje->codigo)) {
-            // Ejemplo de generación automática utilizando el ID de la secuencia o un prefijo
-            $secuencia = DB::getDriverName() === 'pgsql'
-                ? DB::select("SELECT nextval('peritajes_codigo_seq') as id")[0]->id
-                : uniqid();
+        static::creating(function ($peritaje) {
+            if (empty($peritaje->codigo)) {
+                // Ejemplo de generación automática utilizando el ID de la secuencia o un prefijo
+                $secuencia = DB::getDriverName() === 'pgsql'
+                    ? DB::select("SELECT nextval('peritajes_codigo_seq') as id")[0]->id
+                    : uniqid();
 
-            $peritaje->codigo = 'PER-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT);
-        }
-    });
-}
+                $peritaje->codigo = 'PER-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT);
+            }
+        });
+    }
 
     public function tipoVehiculo()
     {
@@ -124,7 +124,7 @@ class Peritaje extends Model
 
     public function accesorios()
     {
-        return $this->hasMany(PeritajeAccesorio::class, 'peritaje_accesorios.peritaje_id');
+        return $this->hasMany(PeritajeAccesorio::class, 'peritaje_id');
     }
 
     public function danosExternos()

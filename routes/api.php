@@ -28,6 +28,10 @@ Route::post('peritajes', [PeritajeController::class, 'store']);
 // ==========================================
 Route::middleware('auth:sanctum')->group(function () {
 
+    Route::post('peritajes/{peritaje}', [PeritajeController::class, 'update']);
+    Route::put('peritajes/{peritaje}', [PeritajeController::class, 'update']);
+    Route::patch('peritajes/{peritaje}', [PeritajeController::class, 'update']);
+
     // Perfil y Contraseña del usuario autenticado
     Route::put('user/password', [AuthController::class, 'updatePassword']);
     Route::put('user/profile', [AuthController::class, 'updateProfile']);
