@@ -58,13 +58,26 @@ class PeritajeController extends Controller
                 'vendedor',
                 'inspector',
                 'cliente',
-                'accesorios',
+                'accesorios.catalogoAccesorio',
                 'danosExternos',
                 'danosInternos',
                 'detallesTecnicos',
                 'sistemasMecanicos',
                 'compresionCilindros'
             ])->findOrFail($id);
+
+            $peritaje->setRelation('accesorios', $peritaje->accesorios->map(function ($item) {
+                return [
+                    'id' => $item->catalogoAccesorio->codigo ?? $item->catalogo_accesorio_id, // Identificador que usa tu frontend (ej: 'aire')
+                    'catalogo_accesorio_id' => $item->catalogo_accesorio_id,
+                    'name' => $item->catalogoAccesorio->nombre ?? '',
+                    'presente' => (bool) $item->presente,
+                    'seleccion' => $item->seleccion,
+                    'danado' => (bool) $item->danado,
+                    'costoReparacion' => $item->costo_reparacion,
+                    'comentarioDaño' => $item->comentario_dano,
+                ];
+            }));
 
             return response()->json([
                 'success' => true,
