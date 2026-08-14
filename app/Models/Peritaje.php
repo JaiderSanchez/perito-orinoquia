@@ -12,7 +12,7 @@ class Peritaje extends Model
     use HasUuids;
 
     protected $fillable = [
-        'codigo', // <-- Agregado para permitir la asignación automática en el boot
+        'codigo',
         'tipo_vehiculo_id',
         'estado',
         'inspector_id',
@@ -83,91 +83,144 @@ class Peritaje extends Model
 
         static::creating(function ($peritaje) {
             if (empty($peritaje->codigo)) {
-                // Ejemplo de generación automática utilizando el ID de la secuencia o un prefijo
                 $secuencia = DB::getDriverName() === 'pgsql'
-                    ? DB::select("SELECT nextval('peritajes_codigo_seq') as id")[0]->id
+                    ? DB::select(
+                        "SELECT nextval('peritajes_codigo_seq') as id"
+                    )[0]->id
                     : uniqid();
 
-                $peritaje->codigo = 'PER-' . str_pad($secuencia, 5, '0', STR_PAD_LEFT);
+                $peritaje->codigo = 'PER-' .
+                    str_pad(
+                        $secuencia,
+                        5,
+                        '0',
+                        STR_PAD_LEFT
+                    );
             }
         });
     }
 
     public function tipoVehiculo()
     {
-        return $this->belongsTo(TipoVehiculo::class);
+        return $this->belongsTo(
+            TipoVehiculo::class
+        );
     }
 
     public function inspector()
     {
-        return $this->belongsTo(User::class, 'inspector_id');
+        return $this->belongsTo(
+            User::class,
+            'inspector_id'
+        );
     }
+
     public function cliente()
     {
-        return $this->hasOne(PeritajeCliente::class, 'peritaje_id', 'id');
+        return $this->hasOne(
+            PeritajeCliente::class,
+            'peritaje_id',
+            'id'
+        );
     }
 
     public function sucursalVendedor()
     {
-        return $this->belongsTo(Sucursal::class, 'sucursal_vendedor_id');
+        return $this->belongsTo(
+            Sucursal::class,
+            'sucursal_vendedor_id'
+        );
     }
 
     public function sucursalInspeccion()
     {
-        return $this->belongsTo(Sucursal::class, 'sucursal_inspeccion_id');
+        return $this->belongsTo(
+            Sucursal::class,
+            'sucursal_inspeccion_id'
+        );
     }
 
     public function vendedor()
     {
-        return $this->belongsTo(Vendedor::class, 'vendedor_id');
+        return $this->belongsTo(
+            Vendedor::class,
+            'vendedor_id'
+        );
     }
 
     public function accesorios()
     {
-        return $this->hasMany(PeritajeAccesorio::class, 'peritaje_id');
+        return $this->hasMany(
+            PeritajeAccesorio::class,
+            'peritaje_id'
+        );
     }
 
     public function danosExternos()
     {
-        return $this->hasMany(PeritajeDanoExterno::class, 'peritaje_danos_externos.peritaje_id');
+        return $this->hasMany(
+            PeritajeDanoExterno::class,
+            'peritaje_id'
+        );
     }
 
     public function danosInternos()
     {
-        return $this->hasMany(PeritajeDanoInterno::class, 'peritaje_danos_internos.peritaje_id');
+        return $this->hasMany(
+            PeritajeDanoInterno::class,
+            'peritaje_id'
+        );
     }
 
     public function detallesTecnicos()
     {
-        return $this->hasMany(PeritajeDetalleTecnico::class, 'peritaje_detalles_tecnicos.peritaje_id');
+        return $this->hasMany(
+            PeritajeDetalleTecnico::class,
+            'peritaje_id'
+        );
     }
 
     public function sistemasMecanicos()
     {
-        return $this->hasMany(PeritajeSistemaMecanico::class, 'peritaje_sistemas_mecanicos.peritaje_id');
+        return $this->hasMany(
+            PeritajeSistemaMecanico::class,
+            'peritaje_id'
+        );
     }
 
     public function compresionCilindros()
     {
-        return $this->hasMany(PeritajeCompresionCilindro::class)->orderBy('numero_cilindro');
+        return $this->hasMany(
+            PeritajeCompresionCilindro::class
+        )->orderBy(
+            'numero_cilindro'
+        );
     }
 
     public function archivos()
     {
-        return $this->hasMany(Archivo::class);
+        return $this->hasMany(
+            Archivo::class
+        );
     }
 
     public function historialEstados()
     {
-        return $this->hasMany(PeritajeHistorialEstado::class)->orderByDesc('created_at');
+        return $this->hasMany(
+            PeritajeHistorialEstado::class
+        )->orderByDesc(
+            'created_at'
+        );
     }
 
     public function imagenes()
     {
-        return $this->hasMany(PeritajeImagen::class, 'peritaje_id');
-
-        
+        return $this->hasMany(
+            PeritajeImagen::class,
+            'peritaje_id'
+        );
     }
+
     public function scopeConDetalleCompleto($query)
     {
         return $query->with([
@@ -186,9 +239,15 @@ class Peritaje extends Model
         ]);
     }
 
-    public function cambiarEstado(string $nuevoEstado, ?int $usuarioId = null, ?string $comentario = null): void
-    {
-        $this->update(['estado' => $nuevoEstado]);
+    public function cambiarEstado(
+        string $nuevoEstado,
+        ?int $usuarioId = null,
+        ?string $comentario = null
+    ): void {
+        $this->update([
+            'estado' => $nuevoEstado,
+        ]);
+
         $this->historialEstados()->create([
             'estado' => $nuevoEstado,
             'usuario_id' => $usuarioId,
@@ -198,6 +257,12 @@ class Peritaje extends Model
 
     public function firmaInspector()
     {
-        return $this->archivos()->where('categoria', 'FIRMA_INSPECTOR')->latest('created_at')->first();
+        return $this->archivos()
+            ->where(
+                'categoria',
+                'FIRMA_INSPECTOR'
+            )
+            ->latest('created_at')
+            ->first();
     }
 }

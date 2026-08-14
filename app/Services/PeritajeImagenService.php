@@ -8,19 +8,6 @@ use Illuminate\Http\Request;
 
 class PeritajeImagenService
 {
-    /**
-     * Guarda las imágenes asociadas al peritaje.
-     *
-     * El frontend puede enviar:
-     *
-     * - imagenes
-     * - peritaje_imagenes
-     *
-     * Y cada imagen puede utilizar:
-     *
-     * - imagen_base64
-     * - base64
-     */
     public function guardar(
         Peritaje $peritaje,
         Request $request
@@ -28,10 +15,6 @@ class PeritajeImagenService
         $imagenes = $request->input('imagenes')
             ?? $request->input('peritaje_imagenes', []);
 
-        /*
-         * Cuando llega como JSON dentro de FormData,
-         * Laravel lo recibe como string.
-         */
         if (is_string($imagenes)) {
             $imagenes = json_decode($imagenes, true);
         }
@@ -51,10 +34,6 @@ class PeritajeImagenService
                 ?? $imagen['base64']
                 ?? null;
 
-            /*
-             * Una imagen necesita al menos sección
-             * y contenido.
-             */
             if (!$seccion || !$base64) {
                 continue;
             }
@@ -74,17 +53,11 @@ class PeritajeImagenService
         }
     }
 
-    /**
-     * Elimina todas las imágenes de un peritaje.
-     */
     public function eliminar(Peritaje $peritaje): void
     {
         $peritaje->imagenes()->delete();
     }
 
-    /**
-     * Elimina una imagen específica.
-     */
     public function eliminarImagen($id): void
     {
         PeritajeImagen::findOrFail($id)->delete();

@@ -27,7 +27,7 @@ class PeritajeService
             'sucursalInspeccion',
             'vendedor',
             'inspector',
-            'accesorios',
+            'accesorios.catalogoAccesorio',
             'danosExternos',
             'danosInternos',
             'detallesTecnicos',
@@ -87,6 +87,7 @@ class PeritajeService
     {
         return DB::transaction(function () use ($request) {
             $data = $this->prepararDatosPrincipales($request);
+
             $data['inspector_id'] = auth()->id();
 
             $peritaje = Peritaje::create($data);
@@ -111,7 +112,10 @@ class PeritajeService
 
             $peritaje->update($data);
 
-            $this->actualizarServicios($peritaje, $request);
+            $this->actualizarServicios(
+                $peritaje,
+                $request
+            );
 
             return $peritaje->load($this->relaciones());
         });
@@ -205,7 +209,8 @@ class PeritajeService
         $this->compresionService->guardar(
             $peritaje,
             $request->input('compresion_cilindros')
-                ?? $request->input('compresionCilindros')
+                ?? $request->input('compresionCilindros'),
+            $request
         );
 
         $this->imagenService->guardar(
@@ -218,7 +223,10 @@ class PeritajeService
         Peritaje $peritaje,
         Request $request
     ): void {
-        $this->guardarServicios($peritaje, $request);
+        $this->guardarServicios(
+            $peritaje,
+            $request
+        );
     }
 
     protected function prepararDatosPrincipales(
@@ -321,8 +329,9 @@ class PeritajeService
 
         if ($archivoSoat) {
             if ($peritaje?->archivo_soat) {
-                Storage::disk('public')
-                    ->delete($peritaje->archivo_soat);
+                Storage::disk('public')->delete(
+                    $peritaje->archivo_soat
+                );
             }
 
             $data['archivo_soat'] = $archivoSoat->store(
@@ -350,8 +359,9 @@ class PeritajeService
         }
     }
 
-    protected function eliminarArchivos(Peritaje $peritaje): void
-    {
+    protected function eliminarArchivos(
+        Peritaje $peritaje
+    ): void {
         if ($peritaje->archivo_soat) {
             Storage::disk('public')->delete(
                 $peritaje->archivo_soat
@@ -365,8 +375,9 @@ class PeritajeService
         }
     }
 
-    protected function verificarPermiso(Peritaje $peritaje): void
-    {
+    protected function verificarPermiso(
+        Peritaje $peritaje
+    ): void {
         if (
             !$this->esAdmin() &&
             (string) $peritaje->inspector_id !==

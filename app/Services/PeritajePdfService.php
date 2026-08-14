@@ -8,16 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class PeritajePdfService
 {
-    /**
-     * Genera el PDF completo del peritaje (Dompdf) con TODAS las secciones
-     * capturadas en el formulario: identificación, documentación legal,
-     * motor + checklist mecánico + compresión, accesorios, daños externos,
-     * daños internos, detalles técnicos, concepto final y firma.
-     *
-     * Esto reemplaza a "handleDescargarPDF" de dashboard.jsx, que hoy solo
-     * arma 5 de las 8 secciones (le faltan daños internos, sistemas
-     * mecánicos detallados y detalles técnicos).
-     */
+
     public function generar(Peritaje $peritaje)
     {
         $peritaje = Peritaje::conDetalleCompleto()->findOrFail($peritaje->id);
