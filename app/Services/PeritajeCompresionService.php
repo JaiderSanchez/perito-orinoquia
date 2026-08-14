@@ -3,37 +3,39 @@
 namespace App\Services;
 
 use App\Models\PeritajeCompresionCilindro;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PeritajeCompresionService
 {
-    /**
-     * Guarda la compresión de los cilindros.
-     */
-    public function guardar($peritaje, $cilindros, $request = null): void
+    public function guardar($peritaje, Request $request): void
     {
-        $peritaje->compresionCilindros()->delete();
+        $cilindros = $request->input(
+            'compresion_cilindros'
+        );
 
-        $cilindrosMapeados = [];
-
-        /*
-         * Formato:
-         *
-         * compresion_cilindros: [
-         *     {
-         *         numero_cilindro: 1,
-         *         presion_psi: 150
-         *     }
-         * ]
-         */
-        if (is_string($cilindros)) {
-            $cilindros = json_decode($cilindros, true);
+        if ($cilindros === null) {
+            $cilindros = $request->input(
+                'compresionCilindros'
+            );
         }
 
-        if (is_array($cilindros) && !empty($cilindros)) {
+        if (is_string($cilindros)) {
+            $cilindros = json_decode(
+                $cilindros,
+                true
+            );
+        }
+
+        $peritaje->compresionCilindros()->delete();
+
+        $registros = [];
+
+        if (is_array($cilindros)) {
             foreach ($cilindros as $index => $item) {
                 if (is_array($item)) {
                     $numero = $item['numero_cilindro']
+                        ?? $item['numero']
                         ?? ($index + 1);
 
                     $presion = $item['presion_psi']
@@ -46,24 +48,22 @@ class PeritajeCompresionService
                     $presion = $item;
                 }
 
-                $cilindrosMapeados[] = [
+                if ($presion === null || $presion === '') {
+                    continue;
+                }
+
+                $registros[] = [
+                    'id' => (string) Str::uuid(),
+                    'peritaje_id' => $peritaje->id,
                     'numero_cilindro' => $numero,
                     'presion_psi' => $presion,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
         }
 
-        /*
-         * Compatibilidad con el formato antiguo:
-         *
-         * compresionCil1
-         * compresionCil2
-         * ...
-         */
-        if (
-            empty($cilindrosMapeados)
-            && $request
-        ) {
+        if (!$registros) {
             for ($i = 1; $i <= 6; $i++) {
                 $valor = $request->input(
                     "compresionCil{$i}"
@@ -75,24 +75,25 @@ class PeritajeCompresionService
                     );
                 }
 
-                if ($valor !== null && $valor !== '') {
-                    $cilindrosMapeados[] = [
-                        'numero_cilindro' => $i,
-                        'presion_psi' => $valor,
-                    ];
+                if ($valor === null || $valor === '') {
+                    continue;
                 }
+
+                $registros[] = [
+                    'id' => (string) Str::uuid(),
+                    'peritaje_id' => $peritaje->id,
+                    'numero_cilindro' => $i,
+                    'presion_psi' => $valor,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
         }
 
-        foreach ($cilindrosMapeados as $cilindro) {
-            PeritajeCompresionCilindro::create([
-                'id' => (string) Str::uuid(),
-                'peritaje_id' => $peritaje->id,
-                'numero_cilindro' => $cilindro['numero_cilindro'],
-                'presion_psi' => $cilindro['presion_psi'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        if ($registros) {
+            PeritajeCompresionCilindro::insert(
+                $registros
+            );
         }
     }
 }

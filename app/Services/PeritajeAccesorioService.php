@@ -3,15 +3,17 @@
 namespace App\Services;
 
 use App\Models\CatalogoAccesorio;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PeritajeAccesorioService
 {
-    /**
-     * Guarda los accesorios asociados a un peritaje.
-     */
-    public function guardar($peritaje, $accesorios, $tipoVehiculoId = null): void
+    public function guardar($peritaje, Request $request): void
     {
+        $accesorios = $request->input('accesorios')
+            ?? $request->input('accesoriosList')
+            ?? $request->input('peritaje_accesorios');
+
         if (is_string($accesorios)) {
             $accesorios = json_decode($accesorios, true);
         }
@@ -29,7 +31,7 @@ class PeritajeAccesorioService
                 continue;
             }
 
-            $catalogo = $this->resolverCatalogo($item, $tipoVehiculoId);
+            $catalogo = $this->resolverCatalogo($item);
 
             if (!$catalogo) {
                 continue;
@@ -39,41 +41,32 @@ class PeritajeAccesorioService
                 'id' => (string) Str::uuid(),
                 'peritaje_id' => $peritaje->id,
                 'catalogo_accesorio_id' => $catalogo->id,
-
                 'presente' => $this->booleano(
                     $item['presente'] ?? true
                 ),
-
                 'seleccion' => $item['seleccion'] ?? null,
-
                 'danado' => $this->booleano(
                     $item['danado'] ?? false
                 ),
-
                 'costo_reparacion' => (int) (
                     $item['costoReparacion']
                     ?? $item['costo_reparacion']
                     ?? 0
                 ),
-
                 'comentario_dano' => $item['comentarioDaño']
                     ?? $item['comentario_dano']
                     ?? null,
-
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
         }
 
-        if (!empty($registros)) {
+        if ($registros) {
             $peritaje->accesorios()->createMany($registros);
         }
     }
 
-    /**
-     * Busca o crea el accesorio del catálogo.
-     */
-    private function resolverCatalogo(array $item, $tipoVehiculoId = null)
+    private function resolverCatalogo(array $item)
     {
         $frontendId = $item['id']
             ?? $item['catalogo_accesorio_id']
@@ -85,33 +78,25 @@ class PeritajeAccesorioService
 
         $catalogo = null;
 
-        /*
-         * Primero intentamos buscar por UUID.
-         */
         if ($this->esUuid($frontendId)) {
             $catalogo = CatalogoAccesorio::find($frontendId);
         }
 
-        /*
-         * Si no existe, buscamos por código o slug.
-         */
         if (!$catalogo) {
-            $catalogo = CatalogoAccesorio::where('codigo', $frontendId)
+            $catalogo = CatalogoAccesorio::where(
+                'codigo',
+                $frontendId
+            )
                 ->orWhere('slug', $frontendId)
                 ->first();
         }
 
-        /*
-         * Si el frontend envía un accesorio que todavía
-         * no existe en el catálogo, lo creamos.
-         */
         if (!$catalogo && !empty($item['name'])) {
             $catalogo = CatalogoAccesorio::create([
                 'id' => (string) Str::uuid(),
                 'nombre' => $item['name'],
                 'codigo' => $frontendId,
-                'slug' => $frontendId,
-                'tipo_vehiculo_id' => $tipoVehiculoId,
+                'slug' => Str::slug($frontendId),
                 'activo' => true,
             ]);
         }
@@ -119,9 +104,6 @@ class PeritajeAccesorioService
         return $catalogo;
     }
 
-    /**
-     * Determina si un valor es UUID.
-     */
     private function esUuid($valor): bool
     {
         if (!is_string($valor)) {
@@ -134,9 +116,6 @@ class PeritajeAccesorioService
         );
     }
 
-    /**
-     * Convierte valores del frontend a 0/1.
-     */
     private function booleano($valor): int
     {
         return filter_var(
