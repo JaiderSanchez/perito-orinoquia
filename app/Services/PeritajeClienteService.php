@@ -2,32 +2,17 @@
 
 namespace App\Services;
 
-use App\Models\Peritaje;
 use App\Models\PeritajeCliente;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PeritajeClienteService
 {
-    /**
-     * Guarda o actualiza el cliente asociado al peritaje.
-     */
     public function guardar(
-        Peritaje $peritaje,
-        Request $request
+        $peritaje,
+        ?string $nombre,
+        ?string $documento,
+        ?string $telefono
     ): ?PeritajeCliente {
-        $nombre = $request->input('clienteNombre')
-            ?? $request->input('cliente_nombre')
-            ?? $request->input('nombre_cliente');
-
-        $documento = $request->input('clienteDocumento')
-            ?? $request->input('cliente_documento')
-            ?? $request->input('documento_cliente');
-
-        $telefono = $request->input('clienteTelefono')
-            ?? $request->input('cliente_telefono')
-            ?? $request->input('telefono_cliene');
-
         if (!$documento) {
             return null;
         }
@@ -45,9 +30,6 @@ class PeritajeClienteService
         );
     }
 
-    /**
-     * Busca clientes por nombre o documento.
-     */
     public function buscar(?string $query)
     {
         return PeritajeCliente::when(

@@ -7,13 +7,6 @@ use App\Models\PeritajeCliente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use App\Services\PeritajeAccesorioService;
-use App\Services\PeritajeClienteService;
-use App\Services\PeritajeCompresionService;
-use App\Services\PeritajeDanosService;
-use App\Services\PeritajeImagenService;
-use App\Services\PeritajeTecnicoService;
 
 class PeritajeService
 {
@@ -27,9 +20,6 @@ class PeritajeService
     ) {
     }
 
-    /**
-     * Relaciones utilizadas en las respuestas del peritaje.
-     */
     protected function relaciones(): array
     {
         return [
@@ -47,9 +37,6 @@ class PeritajeService
         ];
     }
 
-    /**
-     * Relaciones utilizadas para mostrar un peritaje individual.
-     */
     protected function relacionesShow(): array
     {
         return [
@@ -68,20 +55,11 @@ class PeritajeService
         ];
     }
 
-    /**
-     * Determina si el usuario autenticado es administrador.
-     */
     public function esAdmin(): bool
     {
         return auth()->user()?->rol === 'admin';
     }
 
-    /**
-     * Lista los peritajes.
-     *
-     * Los administradores pueden ver todos.
-     * Los inspectores solamente los propios.
-     */
     public function index()
     {
         $query = Peritaje::with($this->relaciones());
@@ -93,62 +71,35 @@ class PeritajeService
         return $query->latest()->get();
     }
 
-    /**
-     * Obtiene un peritaje específico.
-     */
     public function show($id): Peritaje
     {
         $peritaje = Peritaje::with($this->relacionesShow())
             ->findOrFail($id);
 
         $this->verificarPermiso($peritaje);
-
         $this->formatearAccesorios($peritaje);
         $this->formatearImagenes($peritaje);
 
         return $peritaje;
     }
 
-    /**
-     * Crea un nuevo peritaje.
-     */
     public function store(Request $request): Peritaje
     {
         return DB::transaction(function () use ($request) {
-
             $data = $this->prepararDatosPrincipales($request);
-
             $data['inspector_id'] = auth()->id();
 
             $peritaje = Peritaje::create($data);
 
-            $this->clienteService->guardar($peritaje, $request);
-
-            $this->accesorioService->guardar($peritaje, $request);
-
-            $this->danosService->guardarExternos($peritaje, $request);
-
-            $this->danosService->guardarInternos($peritaje, $request);
-
-            $this->tecnicoService->guardarDetalles($peritaje, $request);
-
-            $this->tecnicoService->guardarSistemas($peritaje, $request);
-
-            $this->compresionService->guardar($peritaje, $request);
-
-            $this->imagenService->guardar($peritaje, $request);
+            $this->guardarServicios($peritaje, $request);
 
             return $peritaje->load($this->relaciones());
         });
     }
 
-    /**
-     * Actualiza un peritaje existente.
-     */
     public function update(Request $request, $id): Peritaje
     {
         return DB::transaction(function () use ($request, $id) {
-
             $peritaje = Peritaje::findOrFail($id);
 
             $this->verificarPermiso($peritaje);
@@ -160,55 +111,22 @@ class PeritajeService
 
             $peritaje->update($data);
 
-            $this->clienteService->guardar($peritaje, $request);
-
-            $this->accesorioService->guardar($peritaje, $request);
-
-            $this->danosService->actualizarExternos(
-                $peritaje,
-                $request
-            );
-
-            $this->danosService->actualizarInternos(
-                $peritaje,
-                $request
-            );
-
-            $this->tecnicoService->actualizarDetalles(
-                $peritaje,
-                $request
-            );
-
-            $this->tecnicoService->actualizarSistemas(
-                $peritaje,
-                $request
-            );
-
-            $this->compresionService->guardar(
-                $peritaje,
-                $request
-            );
-
-            $this->imagenService->guardar(
-                $peritaje,
-                $request
-            );
+            $this->actualizarServicios($peritaje, $request);
 
             return $peritaje->load($this->relaciones());
         });
     }
 
-    /**
-     * Elimina un peritaje.
-     */
     public function destroy($id): void
     {
         if (!$this->esAdmin()) {
-            abort(403, 'Solo los administradores pueden eliminar peritajes.');
+            abort(
+                403,
+                'Solo los administradores pueden eliminar peritajes.'
+            );
         }
 
         DB::transaction(function () use ($id) {
-
             $peritaje = Peritaje::findOrFail($id);
 
             $this->eliminarArchivos($peritaje);
@@ -233,63 +151,98 @@ class PeritajeService
         });
     }
 
-    /**
-     * Busca clientes.
-     */
     public function buscarClientes(?string $query)
     {
-        return PeritajeCliente::when($query, function ($builder) use ($query) {
-
-            $builder->where(function ($q) use ($query) {
-                $q->where(
-                    'nombre_cliente',
-                    'like',
-                    "%{$query}%"
-                )->orWhere(
-                    'documento_cliente',
-                    'like',
-                    "%{$query}%"
-                );
-            });
-
-        })
-            ->limit(10)
-            ->get();
+        return $this->clienteService->buscar($query);
     }
 
-    /**
-     * Prepara los campos principales del peritaje.
-     */
+    protected function guardarServicios(
+        Peritaje $peritaje,
+        Request $request
+    ): void {
+        $this->clienteService->guardar(
+            $peritaje,
+            $request->input('nombre_cliente')
+                ?? $request->input('clienteNombre'),
+            $request->input('documento_cliente')
+                ?? $request->input('clienteDocumento'),
+            $request->input('telefono_cliene')
+                ?? $request->input('clienteTelefono')
+        );
+
+        $this->accesorioService->guardar(
+            $peritaje,
+            $request->input('accesorios')
+                ?? $request->input('accesoriosList')
+                ?? $request->input('peritaje_accesorios'),
+            $request->input('tipo_vehiculo_id')
+        );
+
+        $this->danosService->guardarExternos(
+            $peritaje,
+            $request->input('danos_externos')
+                ?? $request->input('danosExternos')
+        );
+
+        $this->danosService->guardarInternos(
+            $peritaje,
+            $request->input('danos_internos')
+                ?? $request->input('danosInternos')
+        );
+
+        $this->tecnicoService->guardarDetalles(
+            $peritaje,
+            $request->input('detalles_tecnicos')
+                ?? $request->input('detallesTecnicos')
+        );
+
+        $this->tecnicoService->guardarSistemas(
+            $peritaje,
+            $request->input('sistemas_mecanicos')
+                ?? $request->input('sistemasMecanicos')
+        );
+
+        $this->compresionService->guardar(
+            $peritaje,
+            $request->input('compresion_cilindros')
+                ?? $request->input('compresionCilindros')
+        );
+
+        $this->imagenService->guardar(
+            $peritaje,
+            $request
+        );
+    }
+
+    protected function actualizarServicios(
+        Peritaje $peritaje,
+        Request $request
+    ): void {
+        $this->guardarServicios($peritaje, $request);
+    }
+
     protected function prepararDatosPrincipales(
         Request $request,
         ?Peritaje $peritaje = null
     ): array {
-
         $data = $request->except([
             'accesorios',
             'accesoriosList',
             'peritaje_accesorios',
-
             'danos_externos',
             'danosExternos',
             'danos_internos',
             'danosInternos',
-
             'detalles_tecnicos',
             'detallesTecnicos',
-
             'sistemas_mecanicos',
             'sistemasMecanicos',
-
             'compresion_cilindros',
             'compresionCilindros',
-
             'imagenes',
             'peritaje_imagenes',
-
             'archivo_soat',
             'archivoSoat',
-
             'archivo_tecnico_mecanica',
             'archivoTecnicoMecanica',
         ]);
@@ -298,27 +251,20 @@ class PeritajeService
             'sucursalVendedorId' => 'sucursal_vendedor_id',
             'sucursalInspeccionId' => 'sucursal_inspeccion_id',
             'vendedorId' => 'vendedor_id',
-
             'tipoVehiculo' => 'tipo_vehiculo',
             'modeloAnio' => 'modelo_anio',
-
             'numMotor' => 'num_motor',
             'numChasis' => 'num_chasis',
-
             'soatAlDia' => 'soat_al_dia',
             'venceSoat' => 'vence_soat',
-
             'tecnicoMecanicaAlDia' => 'tecnico_mecanica_al_dia',
             'venceTecnicoMecanica' => 'vence_tecnico_mecanica',
-
             'nombre_cliente' => 'nombre_cliente',
             'documento_cliente' => 'documento_cliente',
             'telefono_cliene' => 'telefono_cliene',
-
             'clienteNombre' => 'nombre_cliente',
             'clienteDocumento' => 'documento_cliente',
             'clienteTelefono' => 'telefono_cliene',
-
             'comentarios_siniestros' => 'comentarios_siniestros',
             'siniestros' => 'comentarios_siniestros',
         ];
@@ -332,9 +278,6 @@ class PeritajeService
             }
         }
 
-        /*
-         * Valores por defecto que ya utilizaba el controlador original.
-         */
         $data['marca'] = $data['marca']
             ?? $peritaje?->marca
             ?? 'N/A';
@@ -368,81 +311,60 @@ class PeritajeService
         return $data;
     }
 
-    /**
-     * Procesa SOAT y revisión técnico-mecánica.
-     */
     protected function procesarArchivos(
         Request $request,
         array &$data,
         ?Peritaje $peritaje = null
     ): void {
-
-        $archivoSoat = null;
-
-        if ($request->hasFile('archivo_soat')) {
-            $archivoSoat = $request->file('archivo_soat');
-        } elseif ($request->hasFile('archivoSoat')) {
-            $archivoSoat = $request->file('archivoSoat');
-        }
+        $archivoSoat = $request->file('archivo_soat')
+            ?? $request->file('archivoSoat');
 
         if ($archivoSoat) {
-
             if ($peritaje?->archivo_soat) {
                 Storage::disk('public')
                     ->delete($peritaje->archivo_soat);
             }
 
-            $data['archivo_soat'] = $archivoSoat
-                ->store('peritajes/soat', 'public');
-        }
-
-        $archivoRtm = null;
-
-        if ($request->hasFile('archivo_tecnico_mecanica')) {
-            $archivoRtm = $request->file(
-                'archivo_tecnico_mecanica'
-            );
-        } elseif ($request->hasFile('archivoTecnicoMecanica')) {
-            $archivoRtm = $request->file(
-                'archivoTecnicoMecanica'
+            $data['archivo_soat'] = $archivoSoat->store(
+                'peritajes/soat',
+                'public'
             );
         }
+
+        $archivoRtm = $request->file(
+            'archivo_tecnico_mecanica'
+        ) ?? $request->file('archivoTecnicoMecanica');
 
         if ($archivoRtm) {
-
             if ($peritaje?->archivo_tecnico_mecanica) {
-                Storage::disk('public')
-                    ->delete(
-                        $peritaje->archivo_tecnico_mecanica
-                    );
+                Storage::disk('public')->delete(
+                    $peritaje->archivo_tecnico_mecanica
+                );
             }
 
-            $data['archivo_tecnico_mecanica'] = $archivoRtm
-                ->store('peritajes/rtm', 'public');
-        }
-    }
-
-    /**
-     * Elimina archivos físicos asociados.
-     */
-    protected function eliminarArchivos(Peritaje $peritaje): void
-    {
-        if ($peritaje->archivo_soat) {
-            Storage::disk('public')
-                ->delete($peritaje->archivo_soat);
-        }
-
-        if ($peritaje->archivo_tecnico_mecanica) {
-            Storage::disk('public')
-                ->delete(
-                    $peritaje->archivo_tecnico_mecanica
+            $data['archivo_tecnico_mecanica'] =
+                $archivoRtm->store(
+                    'peritajes/rtm',
+                    'public'
                 );
         }
     }
 
-    /**
-     * Comprueba permisos sobre el peritaje.
-     */
+    protected function eliminarArchivos(Peritaje $peritaje): void
+    {
+        if ($peritaje->archivo_soat) {
+            Storage::disk('public')->delete(
+                $peritaje->archivo_soat
+            );
+        }
+
+        if ($peritaje->archivo_tecnico_mecanica) {
+            Storage::disk('public')->delete(
+                $peritaje->archivo_tecnico_mecanica
+            );
+        }
+    }
+
     protected function verificarPermiso(Peritaje $peritaje): void
     {
         if (
@@ -457,40 +379,24 @@ class PeritajeService
         }
     }
 
-    /**
-     * Formatea accesorios para mantener compatibilidad
-     * con la respuesta que esperaba el frontend.
-     */
     protected function formatearAccesorios(
         Peritaje $peritaje
     ): void {
-
         $peritaje->setRelation(
             'accesorios',
             $peritaje->accesorios->map(function ($item) {
-
                 return [
                     'id' => $item->catalogoAccesorio->codigo
                         ?? $item->catalogo_accesorio_id,
-
                     'catalogo_accesorio_id' =>
                         $item->catalogo_accesorio_id,
-
                     'name' =>
                         $item->catalogoAccesorio->nombre ?? '',
-
-                    'presente' =>
-                        (bool) $item->presente,
-
-                    'seleccion' =>
-                        $item->seleccion,
-
-                    'danado' =>
-                        (bool) $item->danado,
-
+                    'presente' => (bool) $item->presente,
+                    'seleccion' => $item->seleccion,
+                    'danado' => (bool) $item->danado,
                     'costoReparacion' =>
                         $item->costo_reparacion,
-
                     'comentarioDaño' =>
                         $item->comentario_dano,
                 ];
@@ -498,17 +404,12 @@ class PeritajeService
         );
     }
 
-    /**
-     * Formatea las imágenes para la respuesta.
-     */
     protected function formatearImagenes(
         Peritaje $peritaje
     ): void {
-
         $peritaje->setRelation(
             'imagenes',
             $peritaje->imagenes->map(function ($img) {
-
                 return [
                     'id' => $img->id,
                     'seccion' => $img->seccion,
