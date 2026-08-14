@@ -162,6 +162,12 @@ class Peritaje extends Model
         return $this->hasMany(PeritajeHistorialEstado::class)->orderByDesc('created_at');
     }
 
+    public function imagenes()
+    {
+        return $this->hasMany(PeritajeImagen::class, 'peritaje_id');
+
+        
+    }
     public function scopeConDetalleCompleto($query)
     {
         return $query->with([

@@ -5,38 +5,35 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; // <--- Importante para emitir tokens
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable; // <--- Trait habilitado
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * Atributos asignables de forma masiva.
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'rol', // <--- Permitimos que se guarde el rol
+        'rol',
+        'sucursal_id',
     ];
 
-    /**
-     * Atributos ocultos en las respuestas JSON.
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Casts automáticos de tipos de datos.
-     */
+    public function sucursal()
+    {
+        return $this->belongsTo(Sucursal::class, 'sucursal_id');
+    }
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed', // Hashea automáticamente la clave al asignarla
+            'password' => 'hashed',
         ];
     }
 }

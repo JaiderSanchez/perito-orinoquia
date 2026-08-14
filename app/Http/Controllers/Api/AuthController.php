@@ -21,7 +21,7 @@ class AuthController extends Controller
 
     public function store(Request $request)
     {
-        // Normalizamos el texto (lo pasamos a minúsculas y quitamos espacios extra)
+        // Normalizamos el texto
         if ($request->has('rol')) {
             $request->merge([
                 'rol' => strtolower(trim($request->rol))
@@ -32,6 +32,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'sucursal_id' => 'required|uuid|exists:sucursales,id',
             'rol' => 'required|string|in:tecnico,inspector,admin',
         ]);
 
@@ -40,6 +41,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'rol' => $request->rol,
+            'sucursal_id' => $request->sucursal_id,
         ]);
 
         return response()->json([
@@ -105,7 +107,7 @@ class AuthController extends Controller
 
         $usuario = User::where('email', $request->email)->first();
 
-        if (! $usuario || ! Hash::check($request->password, $usuario->password)) {
+        if (!$usuario || !Hash::check($request->password, $usuario->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales proporcionadas son incorrectas.'],
             ]);
@@ -134,7 +136,7 @@ class AuthController extends Controller
 
         $usuario = $request->user();
 
-        if (! Hash::check($request->current_password, $usuario->password)) {
+        if (!Hash::check($request->current_password, $usuario->password)) {
             throw ValidationException::withMessages([
                 'current_password' => ['La contraseña actual es incorrecta.'],
             ]);
@@ -152,33 +154,19 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        if ($request->has('rol')) {
-            $request->merge([
-                'rol' => strtolower(trim($request->rol))
-            ]);
-        }
-
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'sucursal_id' => 'required|integer|exists:sucursales,id',
-            'rol' => 'required|string|in:tecnico,inspector,admin',
         ]);
 
-        $user->update($request->all());
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
 
         return response()->json([
             'message' => 'Perfil actualizado correctamente',
-            'usuario' => $user
+            'usuario' => $user,
         ]);
-    }
-
-    public function destroy(User $user)
-    {
-        $user->delete();
-
-        return response()->json([
-            'message' => 'Usuario eliminado correctamente'
-        ], 200);
     }
 }

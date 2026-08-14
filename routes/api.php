@@ -20,9 +20,6 @@ Route::get('sucursales', [CatalogoController::class, 'sucursales']);
 Route::get('vendedores', [CatalogoController::class, 'vendedores']);
 Route::get('/clientes/buscar', [PeritajeController::class, 'buscarClientes']);
 
-// Ruta de creación de peritajes temporalmente pública para evitar bloqueos de token:
-Route::post('peritajes', [PeritajeController::class, 'store']);
-
 // ==========================================
 // 2. RUTAS PROTEGIDAS (Requieren Token Sanctum)
 // ==========================================
@@ -42,6 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Sucursales y Vendedores (Escritura)
     Route::post('sucursales', [CatalogoController::class, 'storeSucursal']);
     Route::post('vendedores', [CatalogoController::class, 'storeVendedor']);
+    Route::post('peritajes', [PeritajeController::class, 'store']);
+
 
     // Peritajes (Lectura y acciones protegidas)
     Route::get('peritajes', [PeritajeController::class, 'index']);

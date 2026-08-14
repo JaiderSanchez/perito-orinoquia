@@ -2,28 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PeritajeCliente extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids; // <--- Añade HasUuids aquí
 
     protected $table = 'peritaje_clientes';
 
-    protected $keyType = 'string';
+    // Opcional si usas HasUuids, pero asegura que Laravel sepa que no es autoincremental numérico
     public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'id',
         'peritaje_id',
         'nombre_cliente',
         'documento_cliente',
-        'telefono_cliene' // Asegúrate que en tu base de datos se llame así, o cámbialo a telefono_cliente en ambos lados
+        'telefono_cliene',
     ];
-
-    public function peritaje()
-    {
-        return $this->belongsTo(Peritaje::class, 'peritaje_id');
-    }
 }
