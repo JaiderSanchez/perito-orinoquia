@@ -46,10 +46,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('peritajes', [PeritajeController::class, 'index']);
     Route::get('peritajes/{peritaje}', [PeritajeController::class, 'show']);
 
-    // Rutas de actualización completa o parcial del peritaje
-    Route::put('peritajes/{peritaje}', [PeritajeController::class, 'update']);
-    Route::patch('peritajes/{peritaje}', [PeritajeController::class, 'update']);
-
     Route::patch('peritajes/{peritaje}/estado', [PeritajeController::class, 'cambiarEstado']);
     Route::delete('peritajes/{peritaje}', [PeritajeController::class, 'destroy']);
 
