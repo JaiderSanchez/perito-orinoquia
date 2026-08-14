@@ -77,16 +77,30 @@ class PeritajeDanosService
 
             $registros[] = [
                 'catalogo_zona_id' => $catalogoId,
-                'estado' => $item['estado']
-                    ?? null,
-                'observaciones' => $item['observaciones']
-                    ?? null,
+                'estado' => $item['estado'] ?? null,
+                'observaciones' => $item['observaciones'] ?? null,
             ];
         }
 
         if (!empty($registros)) {
             $peritaje->danosInternos()->createMany($registros);
         }
+    }
+
+    /**
+     * Actualiza los daños externos.
+     */
+    public function actualizarExternos($peritaje, $danos): void
+    {
+        $this->guardarExternos($peritaje, $danos);
+    }
+
+    /**
+     * Actualiza los daños internos.
+     */
+    public function actualizarInternos($peritaje, $danos): void
+    {
+        $this->guardarInternos($peritaje, $danos);
     }
 
     /**
