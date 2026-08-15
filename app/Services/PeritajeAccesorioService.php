@@ -3,27 +3,26 @@
 namespace App\Services;
 
 use App\Models\CatalogoAccesorio;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class PeritajeAccesorioService
 {
-    public function guardar($peritaje, Request $request): void
+    public function guardar($peritaje, $accesorios): void
     {
-        $accesorios = $request->input('accesorios')
-            ?? $request->input('accesoriosList')
-            ?? $request->input('peritaje_accesorios');
+        $accesorios = $this->normalizar($accesorios);
 
-        if (is_string($accesorios)) {
-            $accesorios = json_decode($accesorios, true);
-        }
-
-        if (!is_array($accesorios)) {
+        if ($accesorios === null) {
             return;
         }
 
-        $peritaje->accesorios()->delete();
+        $tipoVehiculoId = $this->obtenerTipoVehiculoId($peritaje);
 
+        if (!$tipoVehiculoId) {
+            throw new RuntimeException('El peritaje no tiene tipo_vehiculo_id.');
+        }
+
+        $peritaje->accesorios()->delete();
         $registros = [];
 
         foreach ($accesorios as $item) {
@@ -31,7 +30,7 @@ class PeritajeAccesorioService
                 continue;
             }
 
-            $catalogo = $this->resolverCatalogo($item);
+            $catalogo = $this->resolverCatalogo($item, $tipoVehiculoId);
 
             if (!$catalogo) {
                 continue;
@@ -41,21 +40,11 @@ class PeritajeAccesorioService
                 'id' => (string) Str::uuid(),
                 'peritaje_id' => $peritaje->id,
                 'catalogo_accesorio_id' => $catalogo->id,
-                'presente' => $this->booleano(
-                    $item['presente'] ?? true
-                ),
+                'presente' => $this->booleano($item['presente'] ?? false),
                 'seleccion' => $item['seleccion'] ?? null,
-                'danado' => $this->booleano(
-                    $item['danado'] ?? false
-                ),
-                'costo_reparacion' => (int) (
-                    $item['costoReparacion']
-                    ?? $item['costo_reparacion']
-                    ?? 0
-                ),
-                'comentario_dano' => $item['comentarioDaño']
-                    ?? $item['comentario_dano']
-                    ?? null,
+                'danado' => $this->booleano($item['danado'] ?? false),
+                'costo_reparacion' => (int) ($item['costoReparacion'] ?? $item['costo_reparacion'] ?? 0),
+                'comentario_dano' => $item['comentarioDaño'] ?? $item['comentario_dano'] ?? null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -66,51 +55,100 @@ class PeritajeAccesorioService
         }
     }
 
-    private function resolverCatalogo(array $item)
+    private function normalizar($datos): ?array
     {
-        $frontendId = $item['id']
-            ?? $item['catalogo_accesorio_id']
-            ?? null;
-
-        if (!$frontendId) {
+        if ($datos === null || $datos === '') {
             return null;
         }
 
-        $catalogo = null;
-
-        if ($this->esUuid($frontendId)) {
-            $catalogo = CatalogoAccesorio::find($frontendId);
+        if (is_string($datos)) {
+            $datos = json_decode($datos, true);
         }
 
-        if (!$catalogo) {
-            $catalogo = CatalogoAccesorio::where(
-                'codigo',
-                $frontendId
-            )
-                ->orWhere('slug', $frontendId)
+        return is_array($datos) ? array_values($datos) : null;
+    }
+
+    private function obtenerTipoVehiculoId($peritaje)
+    {
+        return $peritaje->tipo_vehiculo_id ?? $peritaje->tipoVehiculoId ?? null;
+    }
+
+    private function resolverCatalogo(array $item, $tipoVehiculoId)
+    {
+        $catalogoId = $item['catalogo_accesorio_id'] ?? null;
+        $frontendId = $item['id'] ?? null;
+        $codigo = $item['codigo'] ?? null;
+        $nombre = $item['name'] ?? $item['nombre'] ?? ($item['catalogo_accesorio']['nombre'] ?? null);
+        $slug = $item['catalogo_accesorio']['slug'] ?? null;
+
+        if ($catalogoId && $this->esUuid($catalogoId)) {
+            $catalogo = CatalogoAccesorio::where('id', $catalogoId)
+                ->where('tipo_vehiculo_id', $tipoVehiculoId)
                 ->first();
+
+            if ($catalogo) {
+                return $catalogo;
+            }
         }
 
-        if (!$catalogo && !empty($item['name'])) {
-            $catalogo = CatalogoAccesorio::create([
-                'id' => (string) Str::uuid(),
-                'nombre' => $item['name'],
-                'codigo' => $frontendId,
-                'slug' => Str::slug($frontendId),
-                'activo' => true,
-            ]);
+        if ($frontendId && $this->esUuid($frontendId)) {
+            $catalogo = CatalogoAccesorio::where('id', $frontendId)
+                ->where('tipo_vehiculo_id', $tipoVehiculoId)
+                ->first();
+
+            if ($catalogo) {
+                return $catalogo;
+            }
         }
 
-        return $catalogo;
+        $catalogo = CatalogoAccesorio::where('tipo_vehiculo_id', $tipoVehiculoId)
+            ->where(function ($query) use ($frontendId, $codigo, $slug, $nombre) {
+                if ($frontendId && !$this->esUuid($frontendId)) {
+                    $query->orWhere('codigo', $frontendId)
+                        ->orWhere('slug', $frontendId);
+                }
+
+                if ($codigo) {
+                    $query->orWhere('codigo', $codigo);
+                }
+
+                if ($slug) {
+                    $query->orWhere('slug', $slug);
+                }
+
+                if ($nombre) {
+                    $query->orWhereRaw('LOWER(nombre) = ?', [mb_strtolower(trim($nombre))]);
+                }
+            })
+            ->first();
+
+        if ($catalogo) {
+            return $catalogo;
+        }
+
+        if (!$nombre) {
+            return null;
+        }
+
+        $codigoCatalogo = $codigo
+            ?? (($frontendId && !$this->esUuid($frontendId)) ? $frontendId : Str::slug($nombre));
+
+        $slugCatalogo = $slug
+            ?? Str::slug($codigoCatalogo);
+
+        return CatalogoAccesorio::create([
+            'id' => (string) Str::uuid(),
+            'tipo_vehiculo_id' => $tipoVehiculoId,
+            'nombre' => $nombre,
+            'codigo' => $codigoCatalogo,
+            'slug' => $slugCatalogo,
+            'activo' => true,
+        ]);
     }
 
     private function esUuid($valor): bool
     {
-        if (!is_string($valor)) {
-            return false;
-        }
-
-        return (bool) preg_match(
+        return is_string($valor) && (bool) preg_match(
             '/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/',
             $valor
         );
@@ -118,9 +156,6 @@ class PeritajeAccesorioService
 
     private function booleano($valor): int
     {
-        return filter_var(
-            $valor,
-            FILTER_VALIDATE_BOOLEAN
-        ) ? 1 : 0;
+        return in_array($valor, [true, 1, '1', 'true', 'TRUE', 'si', 'sí'], true) ? 1 : 0;
     }
 }
