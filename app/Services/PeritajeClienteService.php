@@ -13,19 +13,22 @@ class PeritajeClienteService
         ?string $documento,
         ?string $telefono
     ): ?PeritajeCliente {
-        if (!$documento) {
+        // Si no hay documento ni nombre, no intentamos guardar nada innecesario
+        if (empty($documento) && empty($nombre)) {
             return null;
         }
 
+        // Si el documento viene vacío pero hay nombre, le asignamos uno temporal o evitamos el fallo
+        $documentoFinal = $documento ?? 'SIN-DOCUMENTO-' . $peritaje->id;
+
         return PeritajeCliente::updateOrCreate(
             [
-                'documento_cliente' => $documento,
+                'peritaje_id' => $peritaje->id,
             ],
             [
-                'id' => (string) Str::uuid(),
-                'peritaje_id' => $peritaje->id,
+                'documento_cliente' => $documentoFinal,
                 'nombre_cliente' => $nombre,
-                'telefono_cliene' => $telefono,
+                'telefono_cliente' => $telefono, // <-- Corregido: ahora coincide con la columna "telefono_cliente" de la base de datos
             ]
         );
     }

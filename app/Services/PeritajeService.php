@@ -26,6 +26,7 @@ class PeritajeService
             'sucursalInspeccion',
             'vendedor',
             'inspector',
+            'cliente',
             'accesorios.catalogoAccesorio',
             'danosExternos',
             'danosInternos',
@@ -81,6 +82,8 @@ class PeritajeService
 
     public function store(Request $request): Peritaje
     {
+        \Illuminate\Support\Facades\Log::info('DATOS QUE LLEGAN AL STORE:', $request->all());
+
         return DB::transaction(function () use ($request) {
             $data = $this->prepararDatosPrincipales($request);
             $data['inspector_id'] = auth()->id();
@@ -143,14 +146,12 @@ class PeritajeService
 
     protected function guardarServicios(Peritaje $peritaje, Request $request): void
     {
-        $this->clienteService->guardar(
-            $peritaje,
-            $request->input('nombre_cliente') ?? $request->input('clienteNombre'),
-            $request->input('documento_cliente') ?? $request->input('clienteDocumento'),
-            $request->input('telefono_cliente')
-            ?? $request->input('telefono_cliene')
-            ?? $request->input('clienteTelefono')
-        );
+        // Captura directa y limpia para el servicio de clientes
+        $nombre = $request->input('nombre_cliente') ?? $request->input('clienteNombre');
+        $documento = $request->input('documento_cliente') ?? $request->input('clienteDocumento');
+        $telefono = $request->input('telefono_cliente') ?? $request->input('telefono_cliene') ?? $request->input('clienteTelefono');
+
+        $this->clienteService->guardar($peritaje, $nombre, $documento, $telefono);
 
         $this->accesorioService->guardar(
             $peritaje,
@@ -211,6 +212,13 @@ class PeritajeService
             'archivo_tecnico_mecanica',
             'archivoTecnicoMecanica',
             'archivo_rtm',
+            'nombre_cliente',
+            'documento_cliente',
+            'telefono_cliente',
+            'telefono_cliene',
+            'clienteNombre',
+            'clienteDocumento',
+            'clienteTelefono',
         ]);
 
         $mapeo = [
@@ -226,13 +234,6 @@ class PeritajeService
             'venceSoat' => 'vence_soat',
             'tecnicoMecanicaAlDia' => 'tecnico_mecanica_al_dia',
             'venceTecnicoMecanica' => 'vence_tecnico_mecanica',
-            'nombre_cliente' => 'nombre_cliente',
-            'documento_cliente' => 'documento_cliente',
-            'telefono_cliente' => 'telefono_cliente',
-            'telefono_cliene' => 'telefono_cliente',
-            'clienteNombre' => 'nombre_cliente',
-            'clienteDocumento' => 'documento_cliente',
-            'clienteTelefono' => 'telefono_cliente',
             'comentarios_siniestros' => 'comentarios_siniestros',
             'siniestros' => 'comentarios_siniestros',
             'comentariosMotor' => 'comentarios_motor',
@@ -278,10 +279,6 @@ class PeritajeService
         $data['organismo_transito'] = $data['organismo_transito']
             ?? $peritaje?->organismo_transito
             ?? 'N/A';
-
-        $data['telefono_cliente'] = $data['telefono_cliente']
-            ?? $peritaje?->telefono_cliente
-            ?? '';
 
         $this->procesarArchivos($request, $data, $peritaje);
 
