@@ -23,7 +23,7 @@ class StorePeritajeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tipo_vehiculo_id' => ['required', 'uuid', 'exists:tipos_vehiculo,id'],
+            'tipo_vehiculo_id' => ['sometimes', 'uuid', 'exists:tipos_vehiculo,id'],
             'placa' => ['nullable', 'string', 'max:10'],
             'marca' => ['nullable', 'string', 'max:80'],
             'linea' => ['nullable', 'string', 'max:80'],
@@ -39,12 +39,11 @@ class StorePeritajeRequest extends FormRequest
             'tarjeta_operacion' => ['nullable', 'string', 'max:60'],
             'configuracion_ejes' => ['nullable', 'string', 'max:60'],
 
-            'cilindraje' => 'nullable|string|max:50',
-            'tipo_transmision' => 'nullable|string|max:50',
-            'traccion' => 'nullable|string|max:50',
-            'estado_transmision' => 'nullable|string|max:50',
-            'sistemas_mecanicos' => 'nullable|array',
-
+            'cilindraje' => ['nullable', 'string', 'max:50'],
+            'tipo_transmision' => ['nullable', 'string', 'max:50'],
+            'traccion' => ['nullable', 'string', 'max:50'],
+            'estado_transmision' => ['nullable', 'string', 'max:50'],
+            'sistemas_mecanicos' => ['nullable', 'array'],
         ];
     }
 }

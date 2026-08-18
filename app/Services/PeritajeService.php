@@ -223,6 +223,7 @@ class PeritajeService
             'clienteNombre',
             'clienteDocumento',
             'clienteTelefono',
+            
         ]);
 
         $mapeo = [
@@ -245,7 +246,6 @@ class PeritajeService
             'organismoTransito' => 'organismo_transito',
 
             'cilindraje' => 'cilindraje',
-            'cilindrada' => 'cilindraje',
 
             'tipoTransmision' => 'tipo_transmision',
             'tipo_transmision' => 'tipo_transmision',
