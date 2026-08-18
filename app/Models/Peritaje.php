@@ -36,7 +36,7 @@ class Peritaje extends Model
         'vence_soat',
         'soat_al_dia',
         'archivo_soat',
-        'numero_control_rtm',
+        //'numero_control_rtm',
         'cda_emisor',
         'vence_tecnico_mecanica',
         'tecnico_mecanica_al_dia',
@@ -47,11 +47,20 @@ class Peritaje extends Model
         'tiene_embargos_o_alertas',
         'restriccion_blindaje',
         'comentarios_siniestros',
+
+        'cilindraje',
+        'compresion_motor',
+        'compresion_cilindros',
+        'fugas_aceite',
+        'estado_bateria',
+        'ruidos_extranos',
         'tipo_transmision',
+        'traccion',
         'estado_transmision',
         'comentarios_motor',
         'porcentaje_bateria',
         'vida_util_bateria',
+
         'costo_alistamiento',
         'costo_reparacion',
         'tiempo_estimado_reparacion',
@@ -59,18 +68,12 @@ class Peritaje extends Model
         'concepto_final',
         'comentarios_generales',
 
-        'cilindraje',
-        'tipo_transmision',
-        'traccion',
-        'estado_transmision',
-        'comentarios_motor',
-        
         'score_estructura',
         'score_carroceria',
         'score_mecanica',
         'score_electrico',
         'score_legal',
-        'firmado_en',
+        'firma_inspector',
     ];
 
     protected $casts = [
@@ -81,6 +84,11 @@ class Peritaje extends Model
         'tecnico_mecanica_al_dia' => 'boolean',
         'coincide_propietario_runt' => 'boolean',
         'tiene_embargos_o_alertas' => 'boolean',
+
+        'fugas_aceite' => 'boolean',
+        'ruidos_extranos' => 'boolean',
+        'compresion_cilindros' => 'array',
+
         'firmado_en' => 'datetime',
     ];
 

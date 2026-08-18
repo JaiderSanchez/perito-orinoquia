@@ -48,53 +48,42 @@ class PeritajeTecnicoService
         }
     }
 
-    public function guardarSistemas($peritaje, $datos): void
+     public function guardarSistemas(\App\Models\Peritaje $peritaje, $sistemas): void
     {
-        $sistemas = $this->obtenerDatos(
-            $datos,
-            [
-                'sistemas_mecanicos',
-                'sistemasMecanicos',
-                'peritaje_sistemas_mecanicos',
-            ]
-        );
+        if (is_string($sistemas)) {
+            $sistemas = json_decode($sistemas, true) ?? [];
+        }
 
-        // Elimina los registros anteriores del peritaje para limpiar y actualizar
-        $peritaje->sistemasMecanicos()->delete();
-
-        if ($sistemas === null || !is_array($sistemas)) {
+        if (!is_array($sistemas)) {
             return;
         }
 
-        $registros = [];
-
-        foreach ($sistemas as $key => $item) {
-            // Si el item viene como arreglo con 'estado' u 'observaciones'
-            if (is_array($item)) {
-                $estado = $item['estado'] ?? null;
-                $observaciones = $item['observaciones'] ?? null;
-            } else {
-                $estado = $item;
-                $observaciones = null;
-            }
-
-            if ($estado === null && $observaciones === null) {
+        // Contrato esperado: objeto {sistema_key: {estado, observaciones}}
+        // ej: {"fugasMotor": {"estado":"BUENO","observaciones":"..."}, ...}
+        foreach ($sistemas as $sistemaKey => $valor) {
+            if (!is_string($sistemaKey) || !is_array($valor)) {
                 continue;
             }
 
-            $registros[] = [
-                'id' => (string) \Illuminate\Support\Str::uuid(),
-                'peritaje_id' => $peritaje->id,
-                'item_key' => $key, // Ejemplo: 'fugasMotor', 'correas', etc.
-                'estado' => $estado,
-                'observaciones' => $observaciones,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
+            $estado = $valor['estado'] ?? null;
+            $observaciones = $valor['observaciones'] ?? null;
 
-        if (!empty($registros)) {
-            \App\Models\PeritajeSistemaMecanico::insert($registros);
+            // El check constraint chk_estado_mecanico probablemente exige
+            // BUENO/REGULAR/MALO, así que solo guardamos si hay estado.
+            if (empty($estado)) {
+                continue;
+            }
+
+            \App\Models\PeritajeSistemaMecanico::updateOrCreate(
+                [
+                    'peritaje_id' => $peritaje->id,
+                    'sistema_key' => $sistemaKey,
+                ],
+                [
+                    'estado' => $estado,
+                    'observaciones' => $observaciones,
+                ]
+            );
         }
     }
 

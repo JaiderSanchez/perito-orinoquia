@@ -68,7 +68,11 @@ class PeritajeService
             $query->where('inspector_id', auth()->id());
         }
 
-        return $query->latest()->get();
+        return $query->latest()->get()->each(function (Peritaje $peritaje) {
+            $this->formatearAccesorios($peritaje);
+            $this->formatearImagenes($peritaje);
+            $this->formatearMotor($peritaje);
+        });
     }
 
     public function show($id): Peritaje
@@ -77,6 +81,7 @@ class PeritajeService
         $this->verificarPermiso($peritaje);
         $this->formatearAccesorios($peritaje);
         $this->formatearImagenes($peritaje);
+        $this->formatearMotor($peritaje);
         return $peritaje;
     }
 
@@ -360,6 +365,33 @@ class PeritajeService
 
         $peritaje->setRelation('accesorios', $accesorios);
         $peritaje->setAttribute('accesoriosList', $accesorios);
+    }
+
+    protected function formatearMotor(Peritaje $peritaje): void
+    {
+        // compresionCilindros (relación) -> compresionCil1 ... compresionCilN
+        // que es como Motor.jsx / dashboard.jsx leen la lectura de cada cilindro.
+        foreach ($peritaje->compresionCilindros as $lectura) {
+            $peritaje->setAttribute(
+                'compresionCil' . $lectura->numero_cilindro,
+                $lectura->presion_psi
+            );
+        }
+
+        // sistemasMecanicos (relación, filas sueltas) -> objeto {sistema_key: {estado, observaciones}}
+        // que es como Motor.jsx espera recibir/editar cada ítem mecánico.
+        $sistemas = $peritaje->sistemasMecanicos
+            ->filter(fn ($item) => !empty($item->sistema_key))
+            ->mapWithKeys(function ($item) {
+                return [
+                    $item->sistema_key => [
+                        'estado' => $item->estado,
+                        'observaciones' => $item->observaciones,
+                    ],
+                ];
+            });
+
+        $peritaje->setAttribute('sistemasMecanicos', $sistemas);
     }
 
     protected function formatearImagenes(Peritaje $peritaje): void
