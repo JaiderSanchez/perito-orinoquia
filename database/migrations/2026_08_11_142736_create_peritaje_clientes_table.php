@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->uuid('peritaje_id')->nullable();
             $table->string('nombre_cliente', 120)->nullable();
             $table->string('documento_cliente', 120)->nullable();
-            $table->string('telefono_cliene', 120)->nullable();
+            $table->string('telefono_cliente', 120)->nullable();
             $table->timestamps();
         });
     }

@@ -45,8 +45,7 @@ return new class extends Migration {
             // Información del Cliente
             $table->string('nombre_cliente', 120)->nullable();
             $table->string('documento_cliente', 120)->nullable();
-            $table->string('telefono_cliente', 120)->nullable(); // Corregido de telefono_cliene
-
+            $table->string('telefono_cliente', 120)->nullable();
             $table->string('numero_control_rtm', 60)->nullable();
             $table->string('cda_emisor', 120)->nullable();
             $table->date('vence_tecnico_mecanica')->nullable();

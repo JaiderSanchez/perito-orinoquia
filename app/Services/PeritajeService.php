@@ -149,7 +149,7 @@ class PeritajeService
         // Captura directa y limpia para el servicio de clientes
         $nombre = $request->input('nombre_cliente') ?? $request->input('clienteNombre');
         $documento = $request->input('documento_cliente') ?? $request->input('clienteDocumento');
-        $telefono = $request->input('telefono_cliente') ?? $request->input('telefono_cliene') ?? $request->input('clienteTelefono');
+        $telefono = $request->input('telefono_cliente') ?? $request->input('telefono_cliente') ?? $request->input('clienteTelefono');
 
         $this->clienteService->guardar($peritaje, $nombre, $documento, $telefono);
 
@@ -215,7 +215,6 @@ class PeritajeService
             'nombre_cliente',
             'documento_cliente',
             'telefono_cliente',
-            'telefono_cliene',
             'clienteNombre',
             'clienteDocumento',
             'clienteTelefono',

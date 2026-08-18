@@ -42,7 +42,7 @@ class Peritaje extends Model
         'tecnico_mecanica_al_dia',
         'nombre_cliente',
         'documento_cliente',
-        'telefono_cliene',
+        'telefono_cliente',
         'coincide_propietario_runt',
         'tiene_embargos_o_alertas',
         'restriccion_blindaje',
