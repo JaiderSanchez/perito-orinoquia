@@ -58,6 +58,13 @@ class Peritaje extends Model
         'estado_general_vehiculo',
         'concepto_final',
         'comentarios_generales',
+
+        'cilindraje',
+        'tipo_transmision',
+        'traccion',
+        'estado_transmision',
+        'comentarios_motor',
+        
         'score_estructura',
         'score_carroceria',
         'score_mecanica',
@@ -171,7 +178,6 @@ class Peritaje extends Model
             'peritaje_id'
         );
     }
-
     public function detallesTecnicos()
     {
         return $this->hasMany(
@@ -182,19 +188,15 @@ class Peritaje extends Model
 
     public function sistemasMecanicos()
     {
-        return $this->hasMany(
-            PeritajeSistemaMecanico::class,
-            'peritaje_id'
-        );
+        return $this->hasMany(PeritajeSistemaMecanico::class, 'peritaje_id');
     }
-
     public function compresionCilindros()
     {
         return $this->hasMany(
             PeritajeCompresionCilindro::class
         )->orderBy(
-            'numero_cilindro'
-        );
+                'numero_cilindro'
+            );
     }
 
     public function archivos()
@@ -209,8 +211,8 @@ class Peritaje extends Model
         return $this->hasMany(
             PeritajeHistorialEstado::class
         )->orderByDesc(
-            'created_at'
-        );
+                'created_at'
+            );
     }
 
     public function imagenes()

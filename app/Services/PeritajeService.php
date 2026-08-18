@@ -238,6 +238,15 @@ class PeritajeService
             'comentariosMotor' => 'comentarios_motor',
             'comentarios_motor' => 'comentarios_motor',
             'organismoTransito' => 'organismo_transito',
+
+            'cilindraje' => 'cilindraje',
+            'cilindrada' => 'cilindraje',
+
+            'tipoTransmision' => 'tipo_transmision',
+            'tipo_transmision' => 'tipo_transmision',
+            'traccion' => 'traccion',
+            'estadoTransmision' => 'estado_transmision',
+            'estado_transmision' => 'estado_transmision',
         ];
 
         foreach ($mapeo as $frontend => $backend) {

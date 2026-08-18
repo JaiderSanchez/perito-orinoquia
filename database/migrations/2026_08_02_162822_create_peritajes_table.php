@@ -40,7 +40,11 @@ return new class extends Migration {
             $table->string('entidad_emisora_soat', 120)->nullable();
             $table->date('vence_soat')->nullable();
             $table->boolean('soat_al_dia')->default(true);
-            $table->string('archivo_soat', 255)->nullable(); // Añadido para el archivo adjunto del SOAT
+            $table->string('archivo_soat', 255)->nullable();
+
+            $table->string('tipo_transmision')->nullable();
+            $table->string('traccion')->nullable();
+            $table->string('estado_transmision')->nullable();
 
             // Información del Cliente
             $table->string('nombre_cliente', 120)->nullable();
@@ -107,6 +111,10 @@ return new class extends Migration {
         Schema::dropIfExists('peritaje_historial_estados');
         Schema::dropIfExists('peritajes');
         DB::statement('DROP SEQUENCE IF EXISTS peritajes_codigo_seq');
+        Schema::table('peritajes', function (Blueprint $table) {
+            $table->dropColumn(['tipo_transmision', 'traccion', 'estado_transmision']);
+        });
+
     }
 };
 

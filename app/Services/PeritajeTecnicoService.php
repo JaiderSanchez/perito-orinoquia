@@ -59,36 +59,42 @@ class PeritajeTecnicoService
             ]
         );
 
-        if ($sistemas === null) {
+        // Elimina los registros anteriores del peritaje para limpiar y actualizar
+        $peritaje->sistemasMecanicos()->delete();
+
+        if ($sistemas === null || !is_array($sistemas)) {
             return;
         }
 
-        $peritaje->sistemasMecanicos()->delete();
-
         $registros = [];
 
-        foreach ($sistemas as $item) {
-            if (!is_array($item)) {
-                continue;
+        foreach ($sistemas as $key => $item) {
+            // Si el item viene como arreglo con 'estado' u 'observaciones'
+            if (is_array($item)) {
+                $estado = $item['estado'] ?? null;
+                $observaciones = $item['observaciones'] ?? null;
+            } else {
+                $estado = $item;
+                $observaciones = null;
             }
 
-            $catalogoId = $item['catalogo_sistema_id']
-                ?? $item['id']
-                ?? null;
-
-            if (!$this->idValido($catalogoId)) {
+            if ($estado === null && $observaciones === null) {
                 continue;
             }
 
             $registros[] = [
-                'catalogo_sistema_id' => $catalogoId,
-                'estado' => $item['estado'] ?? null,
-                'observaciones' => $item['observaciones'] ?? null,
+                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'peritaje_id' => $peritaje->id,
+                'item_key' => $key, // Ejemplo: 'fugasMotor', 'correas', etc.
+                'estado' => $estado,
+                'observaciones' => $observaciones,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
         }
 
         if (!empty($registros)) {
-            $peritaje->sistemasMecanicos()->createMany($registros);
+            \App\Models\PeritajeSistemaMecanico::insert($registros);
         }
     }
 
