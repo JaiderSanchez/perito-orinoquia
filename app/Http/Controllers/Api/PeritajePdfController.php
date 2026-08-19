@@ -25,7 +25,13 @@ class PeritajePdfController extends Controller
         $usuario = $request->user();
 
         // El administrador puede generar cualquier PDF.
-        if ($usuario->rol !== 'admin') {
+        if (
+            !in_array(
+                $usuario->rol,
+                ['admin', 'superadmin'],
+                true
+            )
+        ) {
 
             // Los inspectores solo pueden acceder
             // a PDFs de sus propios peritajes.

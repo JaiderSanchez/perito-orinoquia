@@ -29,13 +29,16 @@ class PeritajeItemController extends Controller
             return false;
         }
 
-        // El administrador puede gestionar cualquier peritaje.
-        if ($usuario->rol === 'admin') {
+        if (
+            in_array(
+                $usuario->rol,
+                ['admin', 'superadmin'],
+                true
+            )
+        ) {
             return true;
         }
 
-        // El inspector solamente puede gestionar
-        // los peritajes que le pertenecen.
         return $usuario->rol === 'inspector'
             && (int) $peritaje->inspector_id === (int) $usuario->id;
     }

@@ -3,34 +3,66 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    /**
-     * Listar todos los usuarios.
-     *
-     * Esta ruta está protegida por el middleware "admin"
-     * desde routes/api.php.
-     */
-    public function index()
+    public function login(Request $request)
     {
-        $usuarios = User::with('sucursal')->get();
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::with('sucursal')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['Las credenciales proporcionadas son incorrectas.'],
+            ]);
+        }
+
+        if (!$user->activo) {
+            return response()->json([
+                'error' => 'Este usuario se encuentra inactivo.'
+            ], 403);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Inicio de sesión exitoso.',
+            'token' => $token,
+            'usuario' => $user,
+        ], 200);
+    }
+
+    public function index(Request $request)
+    {
+        $usuarioActual = $request->user();
+
+        if ($usuarioActual?->rol === 'superadmin') {
+            $usuarios = User::with('sucursal')
+                ->where('activo', true)
+                ->get();
+        } else {
+            $usuarios = User::with('sucursal')
+                ->where('activo', true)
+                ->where('rol', '!=', 'superadmin')
+                ->where('oculto', false)
+                ->get();
+        }
 
         return response()->json($usuarios, 200);
     }
 
-    /**
-     * Crear un nuevo usuario.
-     *
-     * Solo administradores deben tener acceso a esta función.
-     */
     public function store(Request $request)
     {
-        // Normalizamos el rol.
         if ($request->has('rol')) {
             $request->merge([
                 'rol' => strtolower(trim($request->rol))
@@ -39,7 +71,6 @@ class AuthController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-
             'email' => [
                 'required',
                 'string',
@@ -47,15 +78,12 @@ class AuthController extends Controller
                 'max:255',
                 'unique:users,email',
             ],
-
             'password' => 'required|string|min:8',
-
             'sucursal_id' => [
                 'required',
                 'uuid',
                 'exists:sucursales,id',
             ],
-
             'rol' => [
                 'required',
                 'string',
@@ -69,24 +97,26 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'rol' => $request->rol,
             'sucursal_id' => $request->sucursal_id,
+            'oculto' => false,
+            'activo' => $request->boolean('activo', true),
         ]);
 
-        // Cargamos la sucursal para devolverla en la respuesta.
         $usuario->load('sucursal');
 
         return response()->json([
-            'message' => 'Usuario creado exitosamente',
+            'message' => 'Usuario creado exitosamente.',
             'usuario' => $usuario
         ], 201);
     }
 
-    /**
-     * Mostrar un usuario específico.
-     *
-     * Solo administradores deben tener acceso.
-     */
     public function show(User $user)
     {
+        if ($user->oculto) {
+            return response()->json([
+                'error' => 'Usuario no encontrado.'
+            ], 404);
+        }
+
         $user->load([
             'sucursal',
             'peritajes'
@@ -98,14 +128,34 @@ class AuthController extends Controller
         ], 200);
     }
 
-    /**
-     * Actualizar un usuario específico.
-     *
-     * Solo administradores deben tener acceso.
-     */
     public function update(Request $request, User $user)
     {
-        // Normalizamos el rol.
+        $usuarioActual = $request->user();
+
+        if ($user->rol === 'superadmin') {
+            return response()->json([
+                'error' => 'El usuario superadmin no puede ser modificado.'
+            ], 403);
+        }
+
+        if ($user->rol === 'admin') {
+            return response()->json([
+                'error' => 'Los usuarios administradores no se pueden modificar desde Gestión de Usuarios. Deben modificar sus datos desde su propio perfil.'
+            ], 403);
+        }
+
+        if (!$usuarioActual || !in_array($usuarioActual->rol, ['admin', 'superadmin'], true)) {
+            return response()->json([
+                'error' => 'No tienes permisos para modificar usuarios.'
+            ], 403);
+        }
+
+        if ($usuarioActual->rol !== 'superadmin' && $user->oculto) {
+            return response()->json([
+                'error' => 'Usuario no encontrado.'
+            ], 404);
+        }
+
         if ($request->has('rol')) {
             $request->merge([
                 'rol' => strtolower(trim($request->rol))
@@ -114,7 +164,6 @@ class AuthController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-
             'email' => [
                 'required',
                 'string',
@@ -122,21 +171,25 @@ class AuthController extends Controller
                 'max:255',
                 'unique:users,email,' . $user->id,
             ],
-
             'password' => 'nullable|string|min:8',
-
             'rol' => [
                 'required',
                 'string',
                 'in:tecnico,inspector,admin',
             ],
-
             'sucursal_id' => [
                 'required',
                 'uuid',
                 'exists:sucursales,id',
             ],
+            'activo' => 'boolean',
         ]);
+
+        if ($usuarioActual->rol === 'admin' && $request->rol === 'admin') {
+            return response()->json([
+                'error' => 'No tienes permisos para asignar el rol de administrador.'
+            ], 403);
+        }
 
         $data = [
             'name' => $request->name,
@@ -145,88 +198,62 @@ class AuthController extends Controller
             'sucursal_id' => $request->sucursal_id,
         ];
 
-        // Solo cambia la contraseña si se envió una nueva.
+        if ($request->has('activo')) {
+            $data['activo'] = $request->boolean('activo');
+        }
+
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
         $user->update($data);
-
-        // Volvemos a cargar los datos desde la base de datos.
         $user->refresh();
         $user->load('sucursal');
 
         return response()->json([
-            'message' => 'Usuario actualizado correctamente',
-            'usuario' => $user
+            'message' => 'Usuario actualizado correctamente.',
+            'usuario' => $user,
         ], 200);
     }
 
-    /**
-     * Eliminar un usuario.
-     *
-     * Solo administradores deben tener acceso.
-     */
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
-        $user->delete();
+        $usuarioActual = $request->user();
 
-        return response()->json([
-            'message' => 'Usuario eliminado correctamente'
-        ], 200);
-    }
-
-    /**
-     * Login.
-     */
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $usuario = User::with('sucursal')
-            ->where('email', $request->email)
-            ->first();
-
-        if (
-            !$usuario ||
-            !Hash::check($request->password, $usuario->password)
-        ) {
-            throw ValidationException::withMessages([
-                'email' => [
-                    'Las credenciales proporcionadas son incorrectas.'
-                ],
-            ]);
+        if (!$usuarioActual || !in_array($usuarioActual->rol, ['admin', 'superadmin'], true)) {
+            return response()->json([
+                'error' => 'No tienes permisos para eliminar usuarios.'
+            ], 403);
         }
 
-        $token = $usuario
-            ->createToken('token_perito_orinoquia')
-            ->plainTextToken;
+        if ($usuarioActual->id === $user->id) {
+            return response()->json([
+                'error' => 'No puedes eliminar tu propio usuario.'
+            ], 403);
+        }
+
+        if ($user->rol === 'superadmin') {
+            return response()->json([
+                'error' => 'El usuario superadmin no puede ser eliminado.'
+            ], 403);
+        }
+
+        if ($user->rol === 'admin') {
+            return response()->json([
+                'error' => 'Los usuarios administradores no se pueden eliminar desde Gestión de Usuarios.'
+            ], 403);
+        }
+
+        $user->update([
+            'activo' => false,
+        ]);
 
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-
-            'usuario' => [
-                'id' => $usuario->id,
-                'nombre' => $usuario->name ?? 'Usuario',
-                'email' => $usuario->email,
-                'rol' => $usuario->rol ?? 'inspector',
-                'sucursal_id' => $usuario->sucursal_id,
-
-                'sucursal' => $usuario->sucursal ? [
-                    'id' => $usuario->sucursal->id,
-                    'nombre' => $usuario->sucursal->nombre,
-                ] : null,
-            ],
-        ]);
+            'success' => true,
+            'message' => 'Usuario eliminado correctamente.'
+        ], 200);
     }
 
-    /**
-     * Actualizar contraseña del usuario autenticado.
-     */
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -236,12 +263,7 @@ class AuthController extends Controller
 
         $usuario = $request->user();
 
-        if (
-            !Hash::check(
-                $request->current_password,
-                $usuario->password
-            )
-        ) {
+        if (!Hash::check($request->current_password, $usuario->password)) {
             throw ValidationException::withMessages([
                 'current_password' => [
                     'La contraseña actual es incorrecta.'
@@ -249,10 +271,7 @@ class AuthController extends Controller
             ]);
         }
 
-        $usuario->password = Hash::make(
-            $request->new_password
-        );
-
+        $usuario->password = Hash::make($request->new_password);
         $usuario->save();
 
         return response()->json([
@@ -260,22 +279,12 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Actualizar perfil del usuario autenticado.
-     *
-     * Aquí NO permitimos modificar:
-     * - rol
-     * - sucursal_id
-     *
-     * Esos datos son responsabilidad del administrador.
-     */
     public function updateProfile(Request $request)
     {
         $user = $request->user();
 
         $request->validate([
             'name' => 'required|string|max:255',
-
             'email' => [
                 'required',
                 'email',
@@ -292,7 +301,7 @@ class AuthController extends Controller
         $user->load('sucursal');
 
         return response()->json([
-            'message' => 'Perfil actualizado correctamente',
+            'message' => 'Perfil actualizado correctamente.',
             'usuario' => $user,
         ]);
     }

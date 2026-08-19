@@ -57,7 +57,11 @@ class PeritajeService
 
     public function esAdmin(): bool
     {
-        return auth()->user()?->rol === 'admin';
+        return in_array(
+            auth()->user()?->rol,
+            ['admin', 'superadmin'],
+            true
+        );
     }
 
     public function index()
@@ -223,7 +227,7 @@ class PeritajeService
             'clienteNombre',
             'clienteDocumento',
             'clienteTelefono',
-            
+
         ]);
 
         $mapeo = [
@@ -381,7 +385,7 @@ class PeritajeService
         // sistemasMecanicos (relación, filas sueltas) -> objeto {sistema_key: {estado, observaciones}}
         // que es como Motor.jsx espera recibir/editar cada ítem mecánico.
         $sistemas = $peritaje->sistemasMecanicos
-            ->filter(fn ($item) => !empty($item->sistema_key))
+            ->filter(fn($item) => !empty($item->sistema_key))
             ->mapWithKeys(function ($item) {
                 return [
                     $item->sistema_key => [

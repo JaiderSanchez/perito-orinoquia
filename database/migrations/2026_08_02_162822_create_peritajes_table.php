@@ -42,9 +42,8 @@ return new class extends Migration {
             $table->boolean('soat_al_dia')->default(true);
             $table->string('archivo_soat', 255)->nullable();
 
-            $table->string('tipo_transmision')->nullable();
-            $table->string('traccion')->nullable();
-            $table->string('estado_transmision')->nullable();
+            $table->string('tipo_transmision', 40)->nullable();
+            $table->string('estado_transmision', 40)->nullable();
 
             // Información del Cliente
             $table->string('nombre_cliente', 120)->nullable();
