@@ -264,6 +264,20 @@ class PeritajeService
             }
         }
 
+        $sistemas = $request->input('sistemas_mecanicos')
+            ?? $request->input('sistemasMecanicos');
+
+        if (is_string($sistemas)) {
+            $sistemas = json_decode($sistemas, true);
+        }
+
+        if (is_array($sistemas) && isset($sistemas['fugasMotor']['estado'])) {
+            $estadoFuga = strtoupper((string) $sistemas['fugasMotor']['estado']);
+            $data['fugas_aceite'] = in_array($estadoFuga, ['REGULAR', 'MALO'], true);
+        } elseif ($request->has('fugas_aceite')) {
+            $data['fugas_aceite'] = $request->boolean('fugas_aceite');
+        }
+
         if (!$request->has('tipoVehiculoId') && !$request->has('tipo_vehiculo_id')) {
             if ($peritaje?->tipo_vehiculo_id) {
                 $data['tipo_vehiculo_id'] = $peritaje->tipo_vehiculo_id;

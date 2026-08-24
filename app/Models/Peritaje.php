@@ -50,7 +50,6 @@ class Peritaje extends Model
 
         'cilindraje',
         'compresion_motor',
-        'compresion_cilindros',
         'fugas_aceite',
         'estado_bateria',
         'ruidos_extranos',
@@ -87,7 +86,6 @@ class Peritaje extends Model
 
         'fugas_aceite' => 'boolean',
         'ruidos_extranos' => 'boolean',
-        'compresion_cilindros' => 'array',
 
         'firmado_en' => 'datetime',
     ];

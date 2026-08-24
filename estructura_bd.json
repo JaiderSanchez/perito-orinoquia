@@ -1,0 +1,2154 @@
+[
+    {
+        "table_name": "archivos",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "archivos",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "archivos",
+        "ordinal_position": 3,
+        "column_name": "categoria",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "archivos",
+        "ordinal_position": 4,
+        "column_name": "entidad_relacionada_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "archivos",
+        "ordinal_position": 5,
+        "column_name": "nombre_original",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "archivos",
+        "ordinal_position": 6,
+        "column_name": "mime_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "archivos",
+        "ordinal_position": 7,
+        "column_name": "url",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "archivos",
+        "ordinal_position": 8,
+        "column_name": "tamanio_bytes",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "archivos",
+        "ordinal_position": 9,
+        "column_name": "subido_por",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "archivos",
+        "ordinal_position": 10,
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+        "table_name": "cache",
+        "ordinal_position": 1,
+        "column_name": "key",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "cache",
+        "ordinal_position": 2,
+        "column_name": "value",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "cache",
+        "ordinal_position": 3,
+        "column_name": "expiration",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "cache_locks",
+        "ordinal_position": 1,
+        "column_name": "key",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "cache_locks",
+        "ordinal_position": 2,
+        "column_name": "owner",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "cache_locks",
+        "ordinal_position": 3,
+        "column_name": "expiration",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 2,
+        "column_name": "tipo_vehiculo_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 3,
+        "column_name": "codigo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 4,
+        "column_name": "nombre",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 5,
+        "column_name": "tipo_campo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'booleano'::character varying"
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 6,
+        "column_name": "opciones",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 7,
+        "column_name": "valor_por_defecto",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 8,
+        "column_name": "orden",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'0'::smallint"
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 9,
+        "column_name": "activo",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "catalogo_accesorios",
+        "ordinal_position": 10,
+        "column_name": "slug",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_elementos_tecnicos",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_elementos_tecnicos",
+        "ordinal_position": 2,
+        "column_name": "codigo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_elementos_tecnicos",
+        "ordinal_position": 3,
+        "column_name": "nombre",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_elementos_tecnicos",
+        "ordinal_position": 4,
+        "column_name": "orden",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'0'::smallint"
+    },
+    {
+        "table_name": "catalogo_elementos_tecnicos",
+        "ordinal_position": 5,
+        "column_name": "activo",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "catalogo_piezas_carroceria",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_piezas_carroceria",
+        "ordinal_position": 2,
+        "column_name": "tipo_vehiculo_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_piezas_carroceria",
+        "ordinal_position": 3,
+        "column_name": "codigo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_piezas_carroceria",
+        "ordinal_position": 4,
+        "column_name": "nombre",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_piezas_carroceria",
+        "ordinal_position": 5,
+        "column_name": "orden",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'0'::smallint"
+    },
+    {
+        "table_name": "catalogo_piezas_carroceria",
+        "ordinal_position": 6,
+        "column_name": "activo",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "catalogo_sistemas_mecanicos",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_sistemas_mecanicos",
+        "ordinal_position": 2,
+        "column_name": "tipo_vehiculo_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_sistemas_mecanicos",
+        "ordinal_position": 3,
+        "column_name": "codigo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_sistemas_mecanicos",
+        "ordinal_position": 4,
+        "column_name": "nombre",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_sistemas_mecanicos",
+        "ordinal_position": 5,
+        "column_name": "orden",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'0'::smallint"
+    },
+    {
+        "table_name": "catalogo_sistemas_mecanicos",
+        "ordinal_position": 6,
+        "column_name": "activo",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "catalogo_zonas_cabina",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_zonas_cabina",
+        "ordinal_position": 2,
+        "column_name": "tipo_vehiculo_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_zonas_cabina",
+        "ordinal_position": 3,
+        "column_name": "codigo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_zonas_cabina",
+        "ordinal_position": 4,
+        "column_name": "nombre",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "catalogo_zonas_cabina",
+        "ordinal_position": 5,
+        "column_name": "orden",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'0'::smallint"
+    },
+    {
+        "table_name": "catalogo_zonas_cabina",
+        "ordinal_position": 6,
+        "column_name": "activo",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "clientes",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": "nextval('clientes_id_seq'::regclass)"
+    },
+    {
+        "table_name": "clientes",
+        "ordinal_position": 2,
+        "column_name": "nombre",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "clientes",
+        "ordinal_position": 3,
+        "column_name": "documento",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "clientes",
+        "ordinal_position": 4,
+        "column_name": "telefono",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "clientes",
+        "ordinal_position": 5,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "clientes",
+        "ordinal_position": 6,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "failed_jobs",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": "nextval('failed_jobs_id_seq'::regclass)"
+    },
+    {
+        "table_name": "failed_jobs",
+        "ordinal_position": 2,
+        "column_name": "uuid",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "failed_jobs",
+        "ordinal_position": 3,
+        "column_name": "connection",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "failed_jobs",
+        "ordinal_position": 4,
+        "column_name": "queue",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "failed_jobs",
+        "ordinal_position": 5,
+        "column_name": "payload",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "failed_jobs",
+        "ordinal_position": 6,
+        "column_name": "exception",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "failed_jobs",
+        "ordinal_position": 7,
+        "column_name": "failed_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO",
+        "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 2,
+        "column_name": "name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 3,
+        "column_name": "total_jobs",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 4,
+        "column_name": "pending_jobs",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 5,
+        "column_name": "failed_jobs",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 6,
+        "column_name": "failed_job_ids",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 7,
+        "column_name": "options",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 8,
+        "column_name": "cancelled_at",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 9,
+        "column_name": "created_at",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "job_batches",
+        "ordinal_position": 10,
+        "column_name": "finished_at",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "jobs",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": "nextval('jobs_id_seq'::regclass)"
+    },
+    {
+        "table_name": "jobs",
+        "ordinal_position": 2,
+        "column_name": "queue",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "jobs",
+        "ordinal_position": 3,
+        "column_name": "payload",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "jobs",
+        "ordinal_position": 4,
+        "column_name": "attempts",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "jobs",
+        "ordinal_position": 5,
+        "column_name": "reserved_at",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "jobs",
+        "ordinal_position": 6,
+        "column_name": "available_at",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "jobs",
+        "ordinal_position": 7,
+        "column_name": "created_at",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "migrations",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "nextval('migrations_id_seq'::regclass)"
+    },
+    {
+        "table_name": "migrations",
+        "ordinal_position": 2,
+        "column_name": "migration",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "migrations",
+        "ordinal_position": 3,
+        "column_name": "batch",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "password_reset_tokens",
+        "ordinal_position": 1,
+        "column_name": "email",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "password_reset_tokens",
+        "ordinal_position": 2,
+        "column_name": "token",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "password_reset_tokens",
+        "ordinal_position": 3,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 3,
+        "column_name": "catalogo_accesorio_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 4,
+        "column_name": "presente",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 5,
+        "column_name": "seleccion",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 6,
+        "column_name": "danado",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 7,
+        "column_name": "costo_reparacion",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 8,
+        "column_name": "comentario_dano",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 9,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_accesorios",
+        "ordinal_position": 10,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_clientes",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": "nextval('peritaje_clientes_id_seq'::regclass)"
+    },
+    {
+        "table_name": "peritaje_clientes",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_clientes",
+        "ordinal_position": 3,
+        "column_name": "nombre_cliente",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_clientes",
+        "ordinal_position": 4,
+        "column_name": "documento_cliente",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_clientes",
+        "ordinal_position": 5,
+        "column_name": "telefono_cliente",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_clientes",
+        "ordinal_position": 6,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_clientes",
+        "ordinal_position": 7,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_compresion_cilindros",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_compresion_cilindros",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_compresion_cilindros",
+        "ordinal_position": 3,
+        "column_name": "numero_cilindro",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_compresion_cilindros",
+        "ordinal_position": 4,
+        "column_name": "presion_psi",
+        "data_type": "smallint",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_compresion_cilindros",
+        "ordinal_position": 5,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_compresion_cilindros",
+        "ordinal_position": 6,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_compresion_cilindros",
+        "ordinal_position": 7,
+        "column_name": "fuga_porcentaje",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 3,
+        "column_name": "catalogo_pieza_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 4,
+        "column_name": "tipo_hallazgo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'NINGUNO'::character varying"
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 5,
+        "column_name": "micras",
+        "data_type": "smallint",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 6,
+        "column_name": "comentario",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 7,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 8,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 9,
+        "column_name": "catalogo_pieza_carroceria_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 10,
+        "column_name": "foto",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_externos",
+        "ordinal_position": 11,
+        "column_name": "fotoNombre",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_internos",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_internos",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_internos",
+        "ordinal_position": 3,
+        "column_name": "catalogo_zona_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_internos",
+        "ordinal_position": 4,
+        "column_name": "estado",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'OPTIMO'::character varying"
+    },
+    {
+        "table_name": "peritaje_danos_internos",
+        "ordinal_position": 5,
+        "column_name": "desgaste",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'NORMAL'::character varying"
+    },
+    {
+        "table_name": "peritaje_danos_internos",
+        "ordinal_position": 6,
+        "column_name": "comentario",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_internos",
+        "ordinal_position": 7,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_danos_internos",
+        "ordinal_position": 8,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_detalles_tecnicos",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_detalles_tecnicos",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_detalles_tecnicos",
+        "ordinal_position": 3,
+        "column_name": "catalogo_elemento_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_detalles_tecnicos",
+        "ordinal_position": 4,
+        "column_name": "danado",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+    },
+    {
+        "table_name": "peritaje_detalles_tecnicos",
+        "ordinal_position": 5,
+        "column_name": "comentario",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_detalles_tecnicos",
+        "ordinal_position": 6,
+        "column_name": "costo",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_detalles_tecnicos",
+        "ordinal_position": 7,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_detalles_tecnicos",
+        "ordinal_position": 8,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_historial_estados",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_historial_estados",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_historial_estados",
+        "ordinal_position": 3,
+        "column_name": "estado",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_historial_estados",
+        "ordinal_position": 4,
+        "column_name": "usuario_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_historial_estados",
+        "ordinal_position": 5,
+        "column_name": "comentario",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_historial_estados",
+        "ordinal_position": 6,
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+        "table_name": "peritaje_imagenes",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": "nextval('peritaje_imagenes_id_seq'::regclass)"
+    },
+    {
+        "table_name": "peritaje_imagenes",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_imagenes",
+        "ordinal_position": 3,
+        "column_name": "seccion",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_imagenes",
+        "ordinal_position": 4,
+        "column_name": "item_id",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_imagenes",
+        "ordinal_position": 5,
+        "column_name": "imagen_base64",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_imagenes",
+        "ordinal_position": 6,
+        "column_name": "nombre_archivo",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_imagenes",
+        "ordinal_position": 7,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_imagenes",
+        "ordinal_position": 8,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_sistemas_mecanicos",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_sistemas_mecanicos",
+        "ordinal_position": 2,
+        "column_name": "peritaje_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_sistemas_mecanicos",
+        "ordinal_position": 3,
+        "column_name": "catalogo_sistema_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_sistemas_mecanicos",
+        "ordinal_position": 4,
+        "column_name": "estado",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'BUENO'::character varying"
+    },
+    {
+        "table_name": "peritaje_sistemas_mecanicos",
+        "ordinal_position": 5,
+        "column_name": "observaciones",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_sistemas_mecanicos",
+        "ordinal_position": 6,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_sistemas_mecanicos",
+        "ordinal_position": 7,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritaje_sistemas_mecanicos",
+        "ordinal_position": 8,
+        "column_name": "sistema_key",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 2,
+        "column_name": "codigo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 3,
+        "column_name": "tipo_vehiculo_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 4,
+        "column_name": "estado",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'borrador'::character varying"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 5,
+        "column_name": "inspector_id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 6,
+        "column_name": "sucursal_vendedor_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 7,
+        "column_name": "sucursal_inspeccion_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 8,
+        "column_name": "vendedor_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 9,
+        "column_name": "fecha_peritaje",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 10,
+        "column_name": "placa",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 11,
+        "column_name": "marca",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 12,
+        "column_name": "linea",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 13,
+        "column_name": "modelo_anio",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 14,
+        "column_name": "color",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 15,
+        "column_name": "num_motor",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 16,
+        "column_name": "num_chasis",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 17,
+        "column_name": "organismo_transito",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 18,
+        "column_name": "kilometraje",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 19,
+        "column_name": "tarjeta_operacion",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 20,
+        "column_name": "configuracion_ejes",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 21,
+        "column_name": "numero_soat",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 22,
+        "column_name": "entidad_emisora_soat",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 23,
+        "column_name": "vence_soat",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 24,
+        "column_name": "soat_al_dia",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 25,
+        "column_name": "archivo_soat",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 26,
+        "column_name": "nombre_cliente",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 27,
+        "column_name": "documento_cliente",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 28,
+        "column_name": "telefono_cliente",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 29,
+        "column_name": "numero_control_rtm",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 30,
+        "column_name": "cda_emisor",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 31,
+        "column_name": "vence_tecnico_mecanica",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 32,
+        "column_name": "tecnico_mecanica_al_dia",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 33,
+        "column_name": "archivo_tecnico_mecanica",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 34,
+        "column_name": "coincide_propietario_runt",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 35,
+        "column_name": "tiene_embargos_o_alertas",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 36,
+        "column_name": "restriccion_blindaje",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'sin_blindaje'::character varying"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 37,
+        "column_name": "comentarios_siniestros",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 38,
+        "column_name": "tipo_transmision",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 39,
+        "column_name": "estado_transmision",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 40,
+        "column_name": "comentarios_motor",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 41,
+        "column_name": "porcentaje_bateria",
+        "data_type": "smallint",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 42,
+        "column_name": "vida_util_bateria",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 43,
+        "column_name": "costo_alistamiento",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": "'0'::numeric"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 44,
+        "column_name": "costo_reparacion",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": "'0'::numeric"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 45,
+        "column_name": "tiempo_estimado_reparacion",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 46,
+        "column_name": "estado_general_vehiculo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'Aceptable'::character varying"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 47,
+        "column_name": "concepto_final",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 48,
+        "column_name": "comentarios_generales",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 49,
+        "column_name": "score_estructura",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'100'::smallint"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 50,
+        "column_name": "score_carroceria",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'100'::smallint"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 51,
+        "column_name": "score_mecanica",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'100'::smallint"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 52,
+        "column_name": "score_electrico",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'100'::smallint"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 53,
+        "column_name": "score_legal",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'100'::smallint"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 54,
+        "column_name": "firmado_en",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 55,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 56,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 57,
+        "column_name": "cilindraje",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 58,
+        "column_name": "traccion",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 59,
+        "column_name": "fugas_aceite",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 60,
+        "column_name": "estado_bateria",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 61,
+        "column_name": "ruidos_extranos",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 62,
+        "column_name": "compresion_motor",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 63,
+        "column_name": "compresion_cilindros",
+        "data_type": "json",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "peritajes",
+        "ordinal_position": 64,
+        "column_name": "firma_inspector",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": "nextval('personal_access_tokens_id_seq'::regclass)"
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 2,
+        "column_name": "tokenable_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 3,
+        "column_name": "tokenable_id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 4,
+        "column_name": "name",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 5,
+        "column_name": "token",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 6,
+        "column_name": "abilities",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 7,
+        "column_name": "last_used_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 8,
+        "column_name": "expires_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 9,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "personal_access_tokens",
+        "ordinal_position": 10,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "sessions",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "sessions",
+        "ordinal_position": 2,
+        "column_name": "user_id",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "sessions",
+        "ordinal_position": 3,
+        "column_name": "ip_address",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "sessions",
+        "ordinal_position": 4,
+        "column_name": "user_agent",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "sessions",
+        "ordinal_position": 5,
+        "column_name": "payload",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "sessions",
+        "ordinal_position": 6,
+        "column_name": "last_activity",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "sucursales",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "sucursales",
+        "ordinal_position": 2,
+        "column_name": "nombre",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "sucursales",
+        "ordinal_position": 3,
+        "column_name": "ciudad",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "sucursales",
+        "ordinal_position": 4,
+        "column_name": "activa",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "sucursales",
+        "ordinal_position": 5,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "sucursales",
+        "ordinal_position": 6,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "tipos_vehiculo",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "tipos_vehiculo",
+        "ordinal_position": 2,
+        "column_name": "codigo",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "tipos_vehiculo",
+        "ordinal_position": 3,
+        "column_name": "nombre",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "tipos_vehiculo",
+        "ordinal_position": 4,
+        "column_name": "icono",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "tipos_vehiculo",
+        "ordinal_position": 5,
+        "column_name": "descripcion",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "tipos_vehiculo",
+        "ordinal_position": 6,
+        "column_name": "orden",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "'0'::smallint"
+    },
+    {
+        "table_name": "tipos_vehiculo",
+        "ordinal_position": 7,
+        "column_name": "activo",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "column_default": "nextval('users_id_seq'::regclass)"
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 2,
+        "column_name": "name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 3,
+        "column_name": "email",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 4,
+        "column_name": "email_verified_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 5,
+        "column_name": "password",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 6,
+        "column_name": "rol",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'tecnico'::character varying"
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 7,
+        "column_name": "remember_token",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 8,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 9,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 10,
+        "column_name": "sucursal_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 11,
+        "column_name": "activo",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "users",
+        "ordinal_position": 12,
+        "column_name": "oculto",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+    },
+    {
+        "table_name": "vendedores",
+        "ordinal_position": 1,
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "vendedores",
+        "ordinal_position": 2,
+        "column_name": "nombre",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+    },
+    {
+        "table_name": "vendedores",
+        "ordinal_position": 3,
+        "column_name": "sucursal_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "vendedores",
+        "ordinal_position": 4,
+        "column_name": "activo",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+    },
+    {
+        "table_name": "vendedores",
+        "ordinal_position": 5,
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    },
+    {
+        "table_name": "vendedores",
+        "ordinal_position": 6,
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null
+    }
+]

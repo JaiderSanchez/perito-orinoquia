@@ -43,6 +43,12 @@ class StorePeritajeRequest extends FormRequest
             'tipo_transmision' => ['nullable', 'string', 'max:50'],
             'traccion' => ['nullable', 'string', 'max:50'],
             'estado_transmision' => ['nullable', 'string', 'max:50'],
+
+            'fugas_aceite' => ['sometimes', 'boolean'],
+            'estado_bateria' => ['nullable', 'string', 'max:50'],
+            'ruidos_extranos' => ['sometimes', 'boolean'],
+            'comentarios_motor' => ['nullable', 'string'],
+
             'sistemas_mecanicos' => ['nullable', 'array'],
         ];
     }
