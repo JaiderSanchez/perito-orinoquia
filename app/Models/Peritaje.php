@@ -36,6 +36,7 @@ class Peritaje extends Model
         'vence_soat',
         'soat_al_dia',
         'archivo_soat',
+        'archivo_tecnico_mecanica',
         //'numero_control_rtm',
         'cda_emisor',
         'vence_tecnico_mecanica',
@@ -73,6 +74,9 @@ class Peritaje extends Model
         'score_electrico',
         'score_legal',
         'firma_inspector',
+        'iniciado_en',
+        'finalizado_en',
+        'tiempo_completitud_segundos',
     ];
 
     protected $casts = [
@@ -88,6 +92,9 @@ class Peritaje extends Model
         'ruidos_extranos' => 'boolean',
 
         'firmado_en' => 'datetime',
+        'iniciado_en' => 'datetime',
+        'finalizado_en' => 'datetime',
+        'tiempo_completitud_segundos' => 'integer',
     ];
 
     protected static function boot()

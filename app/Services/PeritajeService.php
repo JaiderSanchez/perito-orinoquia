@@ -34,6 +34,7 @@ class PeritajeService
             'sistemasMecanicos',
             'compresionCilindros',
             'imagenes',
+            'archivos',
         ];
     }
 
@@ -52,6 +53,7 @@ class PeritajeService
             'sistemasMecanicos',
             'compresionCilindros',
             'imagenes',
+            'archivos',
         ];
     }
 
@@ -91,8 +93,6 @@ class PeritajeService
 
     public function store(Request $request): Peritaje
     {
-        \Illuminate\Support\Facades\Log::info('DATOS QUE LLEGAN AL STORE:', $request->all());
-
         return DB::transaction(function () use ($request) {
             $data = $this->prepararDatosPrincipales($request);
             $data['inspector_id'] = auth()->id();

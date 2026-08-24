@@ -21,8 +21,6 @@ class PeritajeTecnicoService
 
         $peritaje->detallesTecnicos()->delete();
 
-        $registros = [];
-
         foreach ($detalles as $item) {
             if (!is_array($item)) {
                 continue;
@@ -32,19 +30,18 @@ class PeritajeTecnicoService
                 ?? $item['id']
                 ?? null;
 
-            if (!$this->idValido($catalogoId)) {
+            if ($catalogoId === null || $catalogoId === '') {
                 continue;
             }
 
-            $registros[] = [
-                'catalogo_elemento_id' => $catalogoId,
-                'estado' => $item['estado'] ?? null,
-                'observaciones' => $item['observaciones'] ?? null,
-            ];
-        }
-
-        if (!empty($registros)) {
-            $peritaje->detallesTecnicos()->createMany($registros);
+            $esCatalogo = $this->idValido($catalogoId);
+            $peritaje->detallesTecnicos()->create([
+                'catalogo_elemento_id' => $esCatalogo ? $catalogoId : null,
+                'elemento_key' => $esCatalogo ? ($item['elemento_key'] ?? null) : (string) $catalogoId,
+                'danado' => (bool) ($item['dañado'] ?? $item['danado'] ?? false),
+                'comentario' => $item['comentario'] ?? $item['observaciones'] ?? null,
+                'costo' => $item['costo'] ?? null,
+            ]);
         }
     }
 
