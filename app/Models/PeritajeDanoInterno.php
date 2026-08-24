@@ -11,4 +11,9 @@ class PeritajeDanoInterno extends Model
 
     protected $table = 'peritaje_danos_internos'; // Con la 's' en danos
     protected $guarded = [];
+
+    public function catalogoZona()
+    {
+        return $this->belongsTo(CatalogoZonaCabina::class, 'catalogo_zona_id');
+    }
 }

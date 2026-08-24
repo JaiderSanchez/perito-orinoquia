@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\PeritajeController;
 use App\Http\Controllers\Api\PeritajeItemController;
 use App\Http\Controllers\Api\PeritajePdfController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\SystemSettingController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
@@ -32,9 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Perfil y Contraseña del usuario autenticado
     Route::put('user/password', [AuthController::class, 'updatePassword']);
     Route::put('user/profile', [AuthController::class, 'updateProfile']);
+    Route::get('settings', [SystemSettingController::class, 'show']);
+    Route::put('settings', [SystemSettingController::class, 'update']);
 
     // Gestión de Usuarios (CRUD completo)
     Route::apiResource('users', AuthController::class)->middleware('admin');
+    Route::post('users/{user}/restore', [AuthController::class, 'restore'])->middleware('admin');
 
     // Sucursales y Vendedores (Escritura)
     Route::post('sucursales', [CatalogoController::class, 'storeSucursal']);

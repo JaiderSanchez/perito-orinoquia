@@ -11,4 +11,9 @@ class PeritajeDetalleTecnico extends Model
 
     protected $table = 'peritaje_detalles_tecnicos';
     protected $guarded = [];
+
+    public function catalogoElemento()
+    {
+        return $this->belongsTo(CatalogoElementosTecnico::class, 'catalogo_elemento_id');
+    }
 }

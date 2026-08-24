@@ -11,4 +11,9 @@ class PeritajeDanoExterno extends Model
 
     protected $table = 'peritaje_danos_externos'; // Con la 's' en danos
     protected $guarded = [];
+
+    public function catalogoPieza()
+    {
+        return $this->belongsTo(CatalogoPiezaCarroceria::class, 'catalogo_pieza_id');
+    }
 }

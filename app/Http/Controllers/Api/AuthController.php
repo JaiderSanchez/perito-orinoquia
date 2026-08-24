@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
@@ -16,17 +18,21 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'login' => 'required|string|max:255',
             'password' => 'required|string',
         ]);
 
         $user = User::with('sucursal')
-            ->where('email', $request->email)
+            ->where(function ($query) use ($request) {
+                $query->where('email', $request->login)
+                    ->orWhere('username', $request->login)
+                    ->orWhere('name', $request->login);
+            })
             ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Las credenciales proporcionadas son incorrectas.'],
+                'login' => ['Las credenciales proporcionadas son incorrectas.'],
             ]);
         }
 
@@ -69,7 +75,7 @@ class AuthController extends Controller
 
         if ($usuarioActual->rol === 'superadmin') {
             $usuarios = User::with('sucursal')
-                ->where('oculto', false)
+                ->when(!$request->boolean('include_archived'), fn ($query) => $query->where('oculto', false))
                 ->get();
         } else {
             $usuarios = User::with('sucursal')
@@ -94,6 +100,11 @@ class AuthController extends Controller
             ], 403);
         }
 
+        $limiteUsuarios = (int) (SystemSetting::configuration()['limiteUsuarios'] ?? 50);
+        if (User::where('oculto', false)->count() >= $limiteUsuarios) {
+            return response()->json(['error' => "Se alcanzó el límite de {$limiteUsuarios} usuarios configurado por el superadmin."], 422);
+        }
+
         if ($request->has('rol')) {
             $request->merge([
                 'rol' => strtolower(trim($request->rol))
@@ -102,6 +113,7 @@ class AuthController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'username' => 'required|string|min:3|max:60|alpha_dash|unique:users,username',
 
             'email' => [
                 'required',
@@ -111,7 +123,7 @@ class AuthController extends Controller
                 'unique:users,email',
             ],
 
-            'password' => 'required|string|min:8',
+            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()],
 
             'sucursal_id' => [
                 'required',
@@ -122,7 +134,7 @@ class AuthController extends Controller
             'rol' => [
                 'required',
                 'string',
-                'in:tecnico,inspector,admin',
+                'in:tecnico,inspector,admin,superadmin',
             ],
 
             'activo' => 'boolean',
@@ -137,9 +149,13 @@ class AuthController extends Controller
                 'error' => 'No tienes permisos para crear usuarios con rol administrador.'
             ], 403);
         }
+        if ($usuarioActual->rol !== 'superadmin' && $request->rol === 'superadmin') {
+            return response()->json(['error' => 'Solo el superadmin puede crear otra cuenta superadmin.'], 403);
+        }
 
         $usuario = User::create([
             'name' => $request->name,
+            'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'rol' => $request->rol,
@@ -226,7 +242,7 @@ class AuthController extends Controller
          * El superadmin nunca puede ser modificado
          * desde Gestión de Usuarios.
          */
-        if ($user->rol === 'superadmin') {
+        if ($user->rol === 'superadmin' && $usuarioActual->rol !== 'superadmin') {
             return response()->json([
                 'error' => 'El usuario superadmin no puede ser modificado.'
             ], 403);
@@ -236,7 +252,7 @@ class AuthController extends Controller
          * Los administradores tampoco se modifican
          * desde Gestión de Usuarios.
          */
-        if ($user->rol === 'admin') {
+        if ($user->rol === 'admin' && $usuarioActual->rol !== 'superadmin') {
             return response()->json([
                 'error' => 'Los usuarios administradores no se pueden modificar desde Gestión de Usuarios. Deben modificar sus datos desde su propio perfil.'
             ], 403);
@@ -260,6 +276,7 @@ class AuthController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'username' => 'nullable|string|min:3|max:60|alpha_dash|unique:users,username,' . $user->id,
 
             'email' => [
                 'required',
@@ -269,12 +286,12 @@ class AuthController extends Controller
                 'unique:users,email,' . $user->id,
             ],
 
-            'password' => 'nullable|string|min:8',
+            'password' => ['nullable', 'string', Password::min(8)->mixedCase()->numbers()],
 
             'rol' => [
                 'required',
                 'string',
-                'in:tecnico,inspector,admin',
+                'in:tecnico,inspector,admin,superadmin',
             ],
 
             'sucursal_id' => [
@@ -294,9 +311,17 @@ class AuthController extends Controller
                 'error' => 'No tienes permisos para asignar el rol de administrador.'
             ], 403);
         }
+        if ($usuarioActual->rol !== 'superadmin' && $request->rol === 'superadmin') {
+            return response()->json(['error' => 'Solo el superadmin puede asignar ese rol.'], 403);
+        }
+        if ($user->rol === 'superadmin' && ($request->rol !== 'superadmin' || !$request->boolean('activo'))
+            && User::where('rol', 'superadmin')->where('activo', true)->count() <= 1) {
+            return response()->json(['error' => 'No se puede desactivar ni degradar la última cuenta superadmin activa.'], 422);
+        }
 
         $data = [
             'name' => $request->name,
+            'username' => $request->username,
             'email' => $request->email,
             'rol' => $request->rol,
             'sucursal_id' => $request->sucursal_id,
@@ -354,26 +379,38 @@ class AuthController extends Controller
             ], 403);
         }
 
-        if ($user->rol === 'superadmin') {
+        if ($user->rol === 'superadmin' && (
+            $usuarioActual->rol !== 'superadmin'
+            || User::where('rol', 'superadmin')->where('activo', true)->count() <= 1
+        )) {
             return response()->json([
                 'error' => 'El usuario superadmin no puede ser eliminado.'
             ], 403);
         }
 
-        if ($user->rol === 'admin') {
+        if ($user->rol === 'admin' && $usuarioActual->rol !== 'superadmin') {
             return response()->json([
                 'error' => 'Los usuarios administradores no se pueden eliminar desde Gestión de Usuarios.'
             ], 403);
         }
 
-        $user->update([
-            'activo' => false,
-        ]);
+        if ($usuarioActual->rol !== 'superadmin') {
+            return response()->json(['error' => 'Solo el superadmin puede archivar usuarios.'], 403);
+        }
+
+        $user->update(['activo' => false, 'oculto' => true]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Usuario desactivado correctamente.'
+            'message' => 'Usuario archivado. Sus peritajes históricos se conservaron.'
         ], 200);
+    }
+
+    public function restore(Request $request, User $user)
+    {
+        abort_unless($request->user()?->rol === 'superadmin', 403, 'Solo el superadmin puede restaurar usuarios.');
+        $user->update(['oculto' => false, 'activo' => false]);
+        return response()->json(['message' => 'Usuario restaurado como inactivo. Puedes activarlo cuando corresponda.']);
     }
 
     /**
@@ -383,7 +420,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
+            'new_password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
         ]);
 
         $usuario = $request->user();
