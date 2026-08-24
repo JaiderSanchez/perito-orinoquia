@@ -373,17 +373,19 @@ class PeritajeService
 
     protected function formatearMotor(Peritaje $peritaje): void
     {
-        // compresionCilindros (relación) -> compresionCil1 ... compresionCilN
-        // que es como Motor.jsx / dashboard.jsx leen la lectura de cada cilindro.
+
         foreach ($peritaje->compresionCilindros as $lectura) {
             $peritaje->setAttribute(
                 'compresionCil' . $lectura->numero_cilindro,
                 $lectura->presion_psi
             );
+
+            $peritaje->setAttribute(
+                'fugaCil' . $lectura->numero_cilindro,
+                $lectura->fuga_porcentaje
+            );
         }
 
-        // sistemasMecanicos (relación, filas sueltas) -> objeto {sistema_key: {estado, observaciones}}
-        // que es como Motor.jsx espera recibir/editar cada ítem mecánico.
         $sistemas = $peritaje->sistemasMecanicos
             ->filter(fn($item) => !empty($item->sistema_key))
             ->mapWithKeys(function ($item) {
