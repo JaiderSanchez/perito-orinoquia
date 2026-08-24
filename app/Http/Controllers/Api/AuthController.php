@@ -46,10 +46,10 @@ class AuthController extends Controller
     {
         $usuarioActual = $request->user();
 
+        // A:
         if ($usuarioActual?->rol === 'superadmin') {
             $usuarios = User::with('sucursal')
-                ->where('activo', true)
-                ->get();
+                ->get(); // Ver TODOS los usuarios, activos e inactivos
         } else {
             $usuarios = User::with('sucursal')
                 ->where('activo', true)

@@ -120,12 +120,13 @@ class PeritajeItemController extends Controller
             $data['tipo_hallazgo'] === 'NINGUNO'
             && empty($data['comentario'])
         ) {
-            $peritaje->danosExternos()
+            $deleted = $peritaje->danosExternos()
                 ->where('catalogo_pieza_id', $catalogoPiezaId)
                 ->delete();
 
             return response()->json([
-                'deleted' => true
+                'deleted' => $deleted > 0,
+                'message' => $deleted > 0 ? 'Daño externo eliminado.' : 'No se encontró el registro.'
             ]);
         }
 
@@ -174,12 +175,13 @@ class PeritajeItemController extends Controller
             $data['estado'] === 'OPTIMO'
             && empty($data['comentario'])
         ) {
-            $peritaje->danosInternos()
+            $deleted = $peritaje->danosInternos()
                 ->where('catalogo_zona_id', $catalogoZonaId)
                 ->delete();
 
             return response()->json([
-                'deleted' => true
+                'deleted' => $deleted > 0,
+                'message' => $deleted > 0 ? 'Daño interno eliminado.' : 'No se encontró el registro.'
             ]);
         }
 

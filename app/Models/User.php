@@ -18,6 +18,7 @@ class User extends Authenticatable
         'rol',
         'sucursal_id',
         'oculto',
+        'activo',
     ];
 
     protected $hidden = [
@@ -28,6 +29,11 @@ class User extends Authenticatable
     public function sucursal()
     {
         return $this->belongsTo(Sucursal::class, 'sucursal_id');
+    }
+
+    public function peritajes()
+    {
+        return $this->hasMany(Peritaje::class, 'inspector_id');
     }
 
     protected function casts(): array
