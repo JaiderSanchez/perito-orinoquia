@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Perfil y Contraseña del usuario autenticado
     Route::put('user/password', [AuthController::class, 'updatePassword']);
     Route::put('user/profile', [AuthController::class, 'updateProfile']);
+    Route::delete('user/profile', [AuthController::class, 'destroyOwnProfile']);
     Route::get('settings', [SystemSettingController::class, 'show']);
     Route::put('settings', [SystemSettingController::class, 'update']);
 

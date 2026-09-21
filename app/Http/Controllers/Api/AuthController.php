@@ -471,4 +471,26 @@ class AuthController extends Controller
             'usuario' => $user,
         ]);
     }
+
+    /**
+     * Archivar la cuenta del usuario autenticado y cerrar todas sus sesiones.
+     * Los peritajes históricos se conservan para no romper la trazabilidad.
+     */
+    public function destroyOwnProfile(Request $request)
+    {
+        $user = $request->user();
+
+        if (!in_array($user->rol, ['admin', 'tecnico', 'inspector'], true)) {
+            return response()->json([
+                'error' => 'Esta cuenta no se puede eliminar desde el perfil.'
+            ], 403);
+        }
+
+        $user->tokens()->delete();
+        $user->update(['activo' => false, 'oculto' => true]);
+
+        return response()->json([
+            'message' => 'Tu cuenta fue eliminada. Los peritajes históricos se conservaron.'
+        ]);
+    }
 }
