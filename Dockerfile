@@ -9,7 +9,7 @@ RUN composer install \
     --prefer-dist \
     --optimize-autoloader
 
-FROM php:8.3-apache-bookworm
+FROM php:8.4-apache-bookworm
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
