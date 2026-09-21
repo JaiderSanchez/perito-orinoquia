@@ -2,6 +2,7 @@ services:
   - type: web
     name: perito-orinoquia-api
     runtime: docker
+    plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /up
     autoDeploy: true
@@ -51,5 +52,6 @@ services:
 
 databases:
   - name: perito-orinoquia-db
+    plan: free
     databaseName: perito_orinoquia
     user: perito_orinoquia
