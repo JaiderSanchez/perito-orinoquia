@@ -30,6 +30,7 @@ chown -R www-data:www-data storage bootstrap/cache
 
 php artisan storage:link --force
 php artisan migrate --force
+php artisan app:ensure-initial-admin
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
