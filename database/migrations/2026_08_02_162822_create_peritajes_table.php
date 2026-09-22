@@ -61,8 +61,6 @@ return new class extends Migration {
             $table->text('comentarios_siniestros')->nullable();
 
             // Motor
-            $table->string('tipo_transmision', 40)->nullable();
-            $table->string('estado_transmision', 40)->nullable();
             $table->text('comentarios_motor')->nullable();
             $table->smallInteger('porcentaje_bateria')->nullable();
             $table->string('vida_util_bateria', 120)->nullable();
@@ -110,10 +108,5 @@ return new class extends Migration {
         Schema::dropIfExists('peritaje_historial_estados');
         Schema::dropIfExists('peritajes');
         DB::statement('DROP SEQUENCE IF EXISTS peritajes_codigo_seq');
-        Schema::table('peritajes', function (Blueprint $table) {
-            $table->dropColumn(['tipo_transmision', 'traccion', 'estado_transmision']);
-        });
-
     }
 };
-
