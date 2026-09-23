@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 // 1. RUTAS PÚBLICAS (Login, Catálogos y Creación)
 // ==========================================
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:5,1');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:10,1');
 
 // Catálogos públicos y búsqueda:
 Route::get('tipos-vehiculo', [CatalogoController::class, 'tiposVehiculo']);
