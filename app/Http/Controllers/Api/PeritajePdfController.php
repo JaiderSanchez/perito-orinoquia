@@ -37,7 +37,7 @@ class PeritajePdfController extends Controller
             // a PDFs de sus propios peritajes.
             if (
                 $usuario->rol !== 'inspector' ||
-                (int) $peritaje->inspector_id !== (int) $usuario->id
+                (string) $peritaje->inspector_id !== (string) $usuario->id
             ) {
                 return response()->json([
                     'error' => 'No tienes permisos para acceder al PDF de este peritaje.'

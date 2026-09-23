@@ -35,8 +35,8 @@ class PeritajeArchivoService
         if (
             isset($usuario->rol)
             && in_array(
-                strtoupper((string) $usuario->rol),
-                ['ADMIN', 'ADMINISTRADOR'],
+                strtolower((string) $usuario->rol),
+                ['admin', 'superadmin'],
                 true
             )
         ) {
@@ -45,7 +45,7 @@ class PeritajeArchivoService
 
         if (
             isset($peritaje->inspector_id)
-            && (int) $peritaje->inspector_id === (int) $usuario->id
+            && (string) $peritaje->inspector_id === (string) $usuario->id
         ) {
             return true;
         }

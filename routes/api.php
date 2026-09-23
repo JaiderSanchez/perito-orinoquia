@@ -21,12 +21,13 @@ Route::get('tipos-vehiculo', [CatalogoController::class, 'tiposVehiculo']);
 Route::get('tipos-vehiculo/{tipoVehiculo}/checklist', [CatalogoController::class, 'checklist']);
 Route::get('sucursales', [CatalogoController::class, 'sucursales']);
 Route::get('vendedores', [CatalogoController::class, 'vendedores']);
-Route::get('/clientes/buscar', [PeritajeController::class, 'buscarClientes']);
 
 // ==========================================
 // 2. RUTAS PROTEGIDAS (Requieren Token Sanctum)
 // ==========================================
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/clientes/buscar', [PeritajeController::class, 'buscarClientes']);
 
     Route::post('peritajes/{peritaje}', [PeritajeController::class, 'update']);
     Route::put('peritajes/{peritaje}', [PeritajeController::class, 'update']);

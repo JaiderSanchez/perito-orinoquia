@@ -40,7 +40,7 @@ class PeritajeItemController extends Controller
         }
 
         return $usuario->rol === 'inspector'
-            && (int) $peritaje->inspector_id === (int) $usuario->id;
+            && (string) $peritaje->inspector_id === (string) $usuario->id;
     }
 
     /**
