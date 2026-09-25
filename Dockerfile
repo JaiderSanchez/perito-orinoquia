@@ -34,6 +34,7 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
 WORKDIR /var/www/html
 COPY --from=vendor /app /var/www/html
 COPY docker/entrypoint.sh /usr/local/bin/app-entrypoint
+COPY docker/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 RUN chmod +x /usr/local/bin/app-entrypoint \
     && chown -R www-data:www-data storage bootstrap/cache
