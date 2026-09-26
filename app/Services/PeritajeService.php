@@ -16,8 +16,7 @@ class PeritajeService
         protected PeritajeDanosService $danosService,
         protected PeritajeImagenService $imagenService,
         protected PeritajeTecnicoService $tecnicoService
-    ) {
-    }
+    ) {}
 
     protected function relaciones(): array
     {
@@ -70,7 +69,7 @@ class PeritajeService
     {
         $query = Peritaje::with($this->relaciones());
 
-        if (!$this->esAdmin()) {
+        if (! $this->esAdmin()) {
             $query->where('inspector_id', auth()->id());
         }
 
@@ -88,6 +87,7 @@ class PeritajeService
         $this->formatearAccesorios($peritaje);
         $this->formatearImagenes($peritaje);
         $this->formatearMotor($peritaje);
+
         return $peritaje;
     }
 
@@ -120,7 +120,7 @@ class PeritajeService
 
     public function destroy($id): void
     {
-        if (!$this->esAdmin()) {
+        if (! $this->esAdmin()) {
             abort(403, 'Solo los administradores pueden eliminar peritajes.');
         }
 
@@ -200,6 +200,11 @@ class PeritajeService
 
     protected function prepararDatosPrincipales(Request $request, ?Peritaje $peritaje = null): array
     {
+        $request->validate([
+            'calificacion_visual' => ['nullable', 'integer', 'between:0,100'],
+            'observacion_visual' => ['nullable', 'string', 'max:5000'],
+        ]);
+
         $data = $request->except([
             'accesorios',
             'accesoriosList',
@@ -259,7 +264,7 @@ class PeritajeService
         ];
 
         foreach ($mapeo as $frontend => $backend) {
-            if ($request->has($frontend) && !array_key_exists($backend, $data)) {
+            if ($request->has($frontend) && ! array_key_exists($backend, $data)) {
                 $data[$backend] = $request->input($frontend);
             }
         }
@@ -278,7 +283,7 @@ class PeritajeService
             $data['fugas_aceite'] = $request->boolean('fugas_aceite');
         }
 
-        if (!$request->has('tipoVehiculoId') && !$request->has('tipo_vehiculo_id')) {
+        if (! $request->has('tipoVehiculoId') && ! $request->has('tipo_vehiculo_id')) {
             if ($peritaje?->tipo_vehiculo_id) {
                 $data['tipo_vehiculo_id'] = $peritaje->tipo_vehiculo_id;
             }
@@ -354,7 +359,7 @@ class PeritajeService
 
     protected function verificarPermiso(Peritaje $peritaje): void
     {
-        if (!$this->esAdmin() && (string) $peritaje->inspector_id !== (string) auth()->id()) {
+        if (! $this->esAdmin() && (string) $peritaje->inspector_id !== (string) auth()->id()) {
             abort(403, 'No tienes permiso para consultar o modificar este peritaje.');
         }
     }
@@ -390,18 +395,18 @@ class PeritajeService
 
         foreach ($peritaje->compresionCilindros as $lectura) {
             $peritaje->setAttribute(
-                'compresionCil' . $lectura->numero_cilindro,
+                'compresionCil'.$lectura->numero_cilindro,
                 $lectura->presion_psi
             );
 
             $peritaje->setAttribute(
-                'fugaCil' . $lectura->numero_cilindro,
+                'fugaCil'.$lectura->numero_cilindro,
                 $lectura->fuga_porcentaje
             );
         }
 
         $sistemas = $peritaje->sistemasMecanicos
-            ->filter(fn($item) => !empty($item->sistema_key))
+            ->filter(fn ($item) => ! empty($item->sistema_key))
             ->mapWithKeys(function ($item) {
                 return [
                     $item->sistema_key => [

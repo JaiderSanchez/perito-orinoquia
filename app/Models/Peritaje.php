@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +36,7 @@ class Peritaje extends Model
         'soat_al_dia',
         'archivo_soat',
         'archivo_tecnico_mecanica',
-        //'numero_control_rtm',
+        // 'numero_control_rtm',
         'cda_emisor',
         'vence_tecnico_mecanica',
         'tecnico_mecanica_al_dia',
@@ -67,6 +66,8 @@ class Peritaje extends Model
         'estado_general_vehiculo',
         'concepto_final',
         'comentarios_generales',
+        'calificacion_visual',
+        'observacion_visual',
 
         'score_estructura',
         'score_carroceria',
@@ -95,6 +96,7 @@ class Peritaje extends Model
         'iniciado_en' => 'datetime',
         'finalizado_en' => 'datetime',
         'tiempo_completitud_segundos' => 'integer',
+        'calificacion_visual' => 'integer',
     ];
 
     protected static function boot()
@@ -109,7 +111,7 @@ class Peritaje extends Model
                     )[0]->id
                     : uniqid();
 
-                $peritaje->codigo = 'PER-' .
+                $peritaje->codigo = 'PER-'.
                     str_pad(
                         $secuencia,
                         5,
@@ -191,6 +193,7 @@ class Peritaje extends Model
             'peritaje_id'
         );
     }
+
     public function detallesTecnicos()
     {
         return $this->hasMany(
@@ -203,13 +206,14 @@ class Peritaje extends Model
     {
         return $this->hasMany(PeritajeSistemaMecanico::class, 'peritaje_id');
     }
+
     public function compresionCilindros()
     {
         return $this->hasMany(
             PeritajeCompresionCilindro::class
         )->orderBy(
-                'numero_cilindro'
-            );
+            'numero_cilindro'
+        );
     }
 
     public function archivos()
@@ -224,8 +228,8 @@ class Peritaje extends Model
         return $this->hasMany(
             PeritajeHistorialEstado::class
         )->orderByDesc(
-                'created_at'
-            );
+            'created_at'
+        );
     }
 
     public function imagenes()
