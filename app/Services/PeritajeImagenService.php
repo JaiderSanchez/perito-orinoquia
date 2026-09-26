@@ -19,32 +19,33 @@ class PeritajeImagenService
             $imagenes = json_decode($imagenes, true);
         }
 
-        if (!is_array($imagenes)) {
+        if (! is_array($imagenes)) {
             return;
         }
 
         $seccionesSincronizadas = [
             'vista_externa', 'vista_interna', 'detalles_tecnicos',
+            'fotos_vehiculo',
             'documentacion_soat', 'documentacion_rtm',
             'firma_inspector', 'firma_cliente',
         ];
         $clavesRecibidas = collect($imagenes)
-            ->filter(fn ($imagen) => is_array($imagen) && !empty($imagen['seccion']))
-            ->map(fn ($imagen) => $imagen['seccion'] . '|' . ($imagen['item_id'] ?? ''))
+            ->filter(fn ($imagen) => is_array($imagen) && ! empty($imagen['seccion']))
+            ->map(fn ($imagen) => $imagen['seccion'].'|'.($imagen['item_id'] ?? ''))
             ->all();
 
         $peritaje->imagenes()
             ->whereIn('seccion', $seccionesSincronizadas)
             ->get()
             ->reject(fn ($imagen) => in_array(
-                $imagen->seccion . '|' . ($imagen->item_id ?? ''),
+                $imagen->seccion.'|'.($imagen->item_id ?? ''),
                 $clavesRecibidas,
                 true
             ))
             ->each->delete();
 
         foreach ($imagenes as $imagen) {
-            if (!is_array($imagen)) {
+            if (! is_array($imagen)) {
                 continue;
             }
 
@@ -54,7 +55,7 @@ class PeritajeImagenService
                 ?? $imagen['base64']
                 ?? null;
 
-            if (!$seccion || !$base64) {
+            if (! $seccion || ! $base64) {
                 continue;
             }
 
