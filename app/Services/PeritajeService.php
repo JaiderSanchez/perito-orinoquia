@@ -292,6 +292,13 @@ class PeritajeService
         $data['tipo_vehiculo_id'] = $data['tipo_vehiculo_id']
             ?? $peritaje?->tipo_vehiculo_id;
 
+        // Un borrador se crea antes de que el inspector complete la placa. Laravel
+        // convierte la cadena vacía en null y la columna no admite valores nulos;
+        // por eso conservamos el valor existente hasta que llegue una placa real.
+        $data['placa'] = $data['placa']
+            ?? $peritaje?->placa
+            ?? 'SIN-PLACA';
+
         $data['marca'] = $data['marca']
             ?? $peritaje?->marca
             ?? 'N/A';
