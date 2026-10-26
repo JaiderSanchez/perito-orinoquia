@@ -6,6 +6,7 @@ use App\Models\Peritaje;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class PeritajeService
 {
@@ -68,7 +69,6 @@ class PeritajeService
     public function index()
     {
         $query = Peritaje::with($this->relaciones());
-
         if (! $this->esAdmin()) {
             $query->where('inspector_id', auth()->id());
         }
@@ -96,7 +96,6 @@ class PeritajeService
         return DB::transaction(function () use ($request) {
             $data = $this->prepararDatosPrincipales($request);
             $data['inspector_id'] = auth()->id();
-
             $peritaje = Peritaje::create($data);
             $this->guardarServicios($peritaje, $request);
 
@@ -109,7 +108,6 @@ class PeritajeService
         return DB::transaction(function () use ($request, $id) {
             $peritaje = Peritaje::findOrFail($id);
             $this->verificarPermiso($peritaje);
-
             $data = $this->prepararDatosPrincipales($request, $peritaje);
             $peritaje->update($data);
             $this->actualizarServicios($peritaje, $request);
@@ -123,11 +121,9 @@ class PeritajeService
         if (! $this->esAdmin()) {
             abort(403, 'Solo los administradores pueden eliminar peritajes.');
         }
-
         DB::transaction(function () use ($id) {
             $peritaje = Peritaje::findOrFail($id);
             $this->eliminarArchivos($peritaje);
-
             $peritaje->accesorios()->delete();
             $peritaje->danosExternos()->delete();
             $peritaje->danosInternos()->delete();
@@ -135,15 +131,12 @@ class PeritajeService
             $peritaje->sistemasMecanicos()->delete();
             $peritaje->compresionCilindros()->delete();
             $peritaje->imagenes()->delete();
-
             if (method_exists($peritaje, 'archivos')) {
                 $peritaje->archivos()->delete();
             }
-
             if (method_exists($peritaje, 'historialEstados')) {
                 $peritaje->historialEstados()->delete();
             }
-
             $peritaje->delete();
         });
     }
@@ -159,36 +152,29 @@ class PeritajeService
         $nombre = $request->input('nombre_cliente') ?? $request->input('clienteNombre');
         $documento = $request->input('documento_cliente') ?? $request->input('clienteDocumento');
         $telefono = $request->input('telefono_cliente') ?? $request->input('clienteTelefono');
-
         $this->clienteService->guardar($peritaje, $nombre, $documento, $telefono);
-
         $this->accesorioService->guardar(
             $peritaje,
             $request->input('accesoriosList')
             ?? $request->input('accesorios')
             ?? $request->input('peritaje_accesorios')
         );
-
         $this->danosService->guardarExternos(
             $peritaje,
             $request->input('danos_externos') ?? $request->input('danosExternos')
         );
-
         $this->danosService->guardarInternos(
             $peritaje,
             $request->input('danos_internos') ?? $request->input('danosInternos')
         );
-
         $this->tecnicoService->guardarDetalles(
             $peritaje,
             $request->input('detalles_tecnicos') ?? $request->input('detallesTecnicos')
         );
-
         $this->tecnicoService->guardarSistemas(
             $peritaje,
             $request->input('sistemas_mecanicos') ?? $request->input('sistemasMecanicos')
         );
-
         $this->compresionService->guardar($peritaje, $request);
         $this->imagenService->guardar($peritaje, $request);
     }
@@ -204,7 +190,6 @@ class PeritajeService
             'calificacion_visual' => ['nullable', 'integer', 'between:0,100'],
             'observacion_visual' => ['nullable', 'string', 'max:5000'],
         ]);
-
         $data = $request->except([
             'accesorios',
             'accesoriosList',
@@ -232,9 +217,7 @@ class PeritajeService
             'clienteNombre',
             'clienteDocumento',
             'clienteTelefono',
-
         ]);
-
         $mapeo = [
             'sucursalVendedorId' => 'sucursal_vendedor_id',
             'sucursalInspeccionId' => 'sucursal_inspeccion_id',
@@ -253,76 +236,83 @@ class PeritajeService
             'comentariosMotor' => 'comentarios_motor',
             'comentarios_motor' => 'comentarios_motor',
             'organismoTransito' => 'organismo_transito',
-
             'cilindraje' => 'cilindraje',
-
             'tipoTransmision' => 'tipo_transmision',
             'tipo_transmision' => 'tipo_transmision',
             'traccion' => 'traccion',
             'estadoTransmision' => 'estado_transmision',
             'estado_transmision' => 'estado_transmision',
         ];
-
         foreach ($mapeo as $frontend => $backend) {
             if ($request->has($frontend) && ! array_key_exists($backend, $data)) {
                 $data[$backend] = $request->input($frontend);
             }
         }
-
         $sistemas = $request->input('sistemas_mecanicos')
             ?? $request->input('sistemasMecanicos');
-
         if (is_string($sistemas)) {
             $sistemas = json_decode($sistemas, true);
         }
-
         if (is_array($sistemas) && isset($sistemas['fugasMotor']['estado'])) {
             $estadoFuga = strtoupper((string) $sistemas['fugasMotor']['estado']);
             $data['fugas_aceite'] = in_array($estadoFuga, ['REGULAR', 'MALO'], true);
         } elseif ($request->has('fugas_aceite')) {
             $data['fugas_aceite'] = $request->boolean('fugas_aceite');
         }
-
         if (! $request->has('tipoVehiculoId') && ! $request->has('tipo_vehiculo_id')) {
             if ($peritaje?->tipo_vehiculo_id) {
                 $data['tipo_vehiculo_id'] = $peritaje->tipo_vehiculo_id;
             }
         }
-
         $data['tipo_vehiculo_id'] = $data['tipo_vehiculo_id']
             ?? $peritaje?->tipo_vehiculo_id;
-
         // Un borrador se crea antes de que el inspector complete la placa. Laravel
         // convierte la cadena vacía en null y la columna no admite valores nulos;
         // por eso conservamos el valor existente hasta que llegue una placa real.
         $data['placa'] = $data['placa']
             ?? $peritaje?->placa
             ?? 'SIN-PLACA';
-
         $data['marca'] = $data['marca']
             ?? $peritaje?->marca
             ?? 'N/A';
-
         $data['linea'] = $data['linea']
             ?? $peritaje?->linea
             ?? 'N/A';
-
         $data['modelo_anio'] = $data['modelo_anio']
             ?? $peritaje?->modelo_anio
             ?? 0;
-
         $data['num_motor'] = $data['num_motor']
             ?? $peritaje?->num_motor
             ?? 'N/A';
-
         $data['num_chasis'] = $data['num_chasis']
             ?? $peritaje?->num_chasis
             ?? 'N/A';
-
         $data['organismo_transito'] = $data['organismo_transito']
             ?? $peritaje?->organismo_transito
             ?? 'N/A';
-
+        // Las claves visuales de la interfaz no siempre pertenecen a un catálogo.
+        // Conservamos la evaluación completa por peritaje, aparte de las fotos.
+        $visuales = $peritaje?->evaluaciones_visuales ?? [];
+        foreach (['danos_externos' => 'danosExternos', 'danos_internos' => 'danosInternos'] as $campo => $alias) {
+            if (! $request->has($campo) && ! $request->has($alias)) {
+                continue;
+            }
+            $valor = $request->input($campo) ?? $request->input($alias);
+            if (is_string($valor)) {
+                $valor = json_decode($valor, true);
+            }
+            if (! is_array($valor)) {
+                throw ValidationException::withMessages([
+                    $campo => 'La evaluación debe ser una lista u objeto JSON válido.',
+                ]);
+            }
+            $visuales[$campo] = $valor;
+        }
+        // No aceptar una copia del cliente que pueda sobrescribir otras secciones.
+        unset($data['evaluaciones_visuales']);
+        if ($visuales !== []) {
+            $data['evaluaciones_visuales'] = $visuales;
+        }
         $this->procesarArchivos($request, $data, $peritaje);
 
         return $data;
@@ -331,24 +321,19 @@ class PeritajeService
     protected function procesarArchivos(Request $request, array &$data, ?Peritaje $peritaje = null): void
     {
         $archivoSoat = $request->file('archivo_soat') ?? $request->file('archivoSoat');
-
         if ($archivoSoat) {
             if ($peritaje?->archivo_soat) {
                 Storage::disk('public')->delete($peritaje->archivo_soat);
             }
-
             $data['archivo_soat'] = $archivoSoat->store('peritajes/soat', 'public');
         }
-
         $archivoRtm = $request->file('archivo_tecnico_mecanica')
             ?? $request->file('archivoTecnicoMecanica')
             ?? $request->file('archivo_rtm');
-
         if ($archivoRtm) {
             if ($peritaje?->archivo_tecnico_mecanica) {
                 Storage::disk('public')->delete($peritaje->archivo_tecnico_mecanica);
             }
-
             $data['archivo_tecnico_mecanica'] = $archivoRtm->store('peritajes/rtm', 'public');
         }
     }
@@ -358,7 +343,6 @@ class PeritajeService
         if ($peritaje->archivo_soat) {
             Storage::disk('public')->delete($peritaje->archivo_soat);
         }
-
         if ($peritaje->archivo_tecnico_mecanica) {
             Storage::disk('public')->delete($peritaje->archivo_tecnico_mecanica);
         }
@@ -392,26 +376,22 @@ class PeritajeService
                 'comentario_dano' => $item->comentario_dano ?? '',
             ];
         })->values();
-
         $peritaje->setRelation('accesorios', $accesorios);
         $peritaje->setAttribute('accesoriosList', $accesorios);
     }
 
     protected function formatearMotor(Peritaje $peritaje): void
     {
-
         foreach ($peritaje->compresionCilindros as $lectura) {
             $peritaje->setAttribute(
                 'compresionCil'.$lectura->numero_cilindro,
                 $lectura->presion_psi
             );
-
             $peritaje->setAttribute(
                 'fugaCil'.$lectura->numero_cilindro,
                 $lectura->fuga_porcentaje
             );
         }
-
         $sistemas = $peritaje->sistemasMecanicos
             ->filter(fn ($item) => ! empty($item->sistema_key))
             ->mapWithKeys(function ($item) {
@@ -422,7 +402,6 @@ class PeritajeService
                     ],
                 ];
             });
-
         $peritaje->setAttribute('sistemasMecanicos', $sistemas);
     }
 

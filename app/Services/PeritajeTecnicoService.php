@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Peritaje;
+use App\Models\PeritajeSistemaMecanico;
+
 class PeritajeTecnicoService
 {
     public function guardarDetalles($peritaje, $datos): void
@@ -14,26 +17,20 @@ class PeritajeTecnicoService
                 'peritaje_detalles_tecnicos',
             ]
         );
-
         if ($detalles === null) {
             return;
         }
-
         $peritaje->detallesTecnicos()->delete();
-
         foreach ($detalles as $item) {
-            if (!is_array($item)) {
+            if (! is_array($item)) {
                 continue;
             }
-
             $catalogoId = $item['catalogo_elemento_id']
                 ?? $item['id']
                 ?? null;
-
             if ($catalogoId === null || $catalogoId === '') {
                 continue;
             }
-
             $esCatalogo = $this->idValido($catalogoId);
             $peritaje->detallesTecnicos()->create([
                 'catalogo_elemento_id' => $esCatalogo ? $catalogoId : null,
@@ -45,33 +42,28 @@ class PeritajeTecnicoService
         }
     }
 
-     public function guardarSistemas(\App\Models\Peritaje $peritaje, $sistemas): void
+    public function guardarSistemas(Peritaje $peritaje, $sistemas): void
     {
         if (is_string($sistemas)) {
             $sistemas = json_decode($sistemas, true) ?? [];
         }
-
-        if (!is_array($sistemas)) {
+        if (! is_array($sistemas)) {
             return;
         }
-
         // Contrato esperado: objeto {sistema_key: {estado, observaciones}}
         // ej: {"fugasMotor": {"estado":"BUENO","observaciones":"..."}, ...}
         foreach ($sistemas as $sistemaKey => $valor) {
-            if (!is_string($sistemaKey) || !is_array($valor)) {
+            if (! is_string($sistemaKey) || ! is_array($valor)) {
                 continue;
             }
-
             $estado = $valor['estado'] ?? null;
             $observaciones = $valor['observaciones'] ?? null;
-
             // El check constraint chk_estado_mecanico probablemente exige
             // BUENO/REGULAR/MALO, así que solo guardamos si hay estado.
             if (empty($estado)) {
                 continue;
             }
-
-            \App\Models\PeritajeSistemaMecanico::updateOrCreate(
+            PeritajeSistemaMecanico::updateOrCreate(
                 [
                     'peritaje_id' => $peritaje->id,
                     'sistema_key' => $sistemaKey,
@@ -89,14 +81,15 @@ class PeritajeTecnicoService
         if ($datos === null) {
             return null;
         }
-
         if (is_array($datos)) {
             return $datos;
         }
-
+        if (is_string($datos)) {
+            return $this->normalizar($datos);
+        }
         foreach ($campos as $campo) {
             if (method_exists($datos, 'has')) {
-                if (!$datos->has($campo)) {
+                if (! $datos->has($campo)) {
                     continue;
                 }
 
@@ -114,7 +107,6 @@ class PeritajeTecnicoService
         if ($datos === null || $datos === '') {
             return null;
         }
-
         if (is_string($datos)) {
             $datos = json_decode($datos, true);
         }
@@ -127,7 +119,6 @@ class PeritajeTecnicoService
         if ($id === null || $id === '') {
             return false;
         }
-
         if (is_numeric($id)) {
             return true;
         }
@@ -137,7 +128,7 @@ class PeritajeTecnicoService
 
     private function esUuid($valor): bool
     {
-        if (!is_string($valor)) {
+        if (! is_string($valor)) {
             return false;
         }
 

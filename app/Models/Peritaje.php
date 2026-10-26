@@ -11,6 +11,7 @@ class Peritaje extends Model
     use HasUuids;
 
     protected $fillable = [
+        'evaluaciones_visuales',
         'codigo',
         'tipo_vehiculo_id',
         'estado',
@@ -36,7 +37,7 @@ class Peritaje extends Model
         'soat_al_dia',
         'archivo_soat',
         'archivo_tecnico_mecanica',
-        // 'numero_control_rtm',
+        'numero_control_rtm',
         'cda_emisor',
         'vence_tecnico_mecanica',
         'tecnico_mecanica_al_dia',
@@ -47,7 +48,6 @@ class Peritaje extends Model
         'tiene_embargos_o_alertas',
         'restriccion_blindaje',
         'comentarios_siniestros',
-
         'cilindraje',
         'compresion_motor',
         'fugas_aceite',
@@ -59,7 +59,6 @@ class Peritaje extends Model
         'comentarios_motor',
         'porcentaje_bateria',
         'vida_util_bateria',
-
         'costo_alistamiento',
         'costo_reparacion',
         'tiempo_estimado_reparacion',
@@ -68,7 +67,6 @@ class Peritaje extends Model
         'comentarios_generales',
         'calificacion_visual',
         'observacion_visual',
-
         'score_estructura',
         'score_carroceria',
         'score_mecanica',
@@ -81,6 +79,7 @@ class Peritaje extends Model
     ];
 
     protected $casts = [
+        'evaluaciones_visuales' => 'array',
         'fecha_peritaje' => 'datetime',
         'vence_soat' => 'datetime',
         'vence_tecnico_mecanica' => 'datetime',
@@ -88,10 +87,8 @@ class Peritaje extends Model
         'tecnico_mecanica_al_dia' => 'boolean',
         'coincide_propietario_runt' => 'boolean',
         'tiene_embargos_o_alertas' => 'boolean',
-
         'fugas_aceite' => 'boolean',
         'ruidos_extranos' => 'boolean',
-
         'firmado_en' => 'datetime',
         'iniciado_en' => 'datetime',
         'finalizado_en' => 'datetime',
@@ -102,7 +99,6 @@ class Peritaje extends Model
     protected static function boot()
     {
         parent::boot();
-
         static::creating(function ($peritaje) {
             if (empty($peritaje->codigo)) {
                 $secuencia = DB::getDriverName() === 'pgsql'
@@ -110,7 +106,6 @@ class Peritaje extends Model
                         "SELECT nextval('peritajes_codigo_seq') as id"
                     )[0]->id
                     : uniqid();
-
                 $peritaje->codigo = 'PER-'.
                     str_pad(
                         $secuencia,
@@ -266,7 +261,6 @@ class Peritaje extends Model
         $this->update([
             'estado' => $nuevoEstado,
         ]);
-
         $this->historialEstados()->create([
             'estado' => $nuevoEstado,
             'usuario_id' => $usuarioId,
